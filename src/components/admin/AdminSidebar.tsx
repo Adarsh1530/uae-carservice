@@ -52,9 +52,9 @@ export const AdminSidebar = () => {
           <div className="w-8 h-8 rounded-lg bg-brand-green flex items-center justify-center font-bold text-black text-sm">
             W
           </div>
-          <span className="font-heading font-extrabold text-white text-sm">
-            WHALESS <span className="text-brand-green">ADMIN</span>
-          </span>
+            <span className="font-heading font-black text-sm tracking-wider text-white group-hover:text-brand-green transition-colors">
+              WALESS <span className="text-brand-green">ADMIN</span>
+            </span>
         </div>
 
         <button

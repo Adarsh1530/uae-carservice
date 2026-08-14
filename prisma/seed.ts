@@ -47,7 +47,7 @@ async function main() {
       data: {
         username: adminUsername,
         passwordHash: passwordHash,
-        name: 'WHALESS GROUP Administrator',
+        name: 'WALESS GROUP Administrator',
         role: 'ADMIN',
       },
     });
@@ -231,7 +231,7 @@ async function main() {
     await prisma.galleryImage.create({
       data: {
         title: item.title,
-        description: `${item.title} delivered by WHALESS GROUP in Ras Al Khaimah, UAE.`,
+        description: `${item.title} delivered by WALESS GROUP in Ras Al Khaimah, UAE.`,
         imageUrl: imgUrl,
         category: item.cat,
         displayOrder: order++,
@@ -241,7 +241,7 @@ async function main() {
   }
   console.log('✅ Gallery Images seeded successfully.');
 
-  console.log('🎉 WHALESS GROUP Database Seeding Completed!');
+  console.log('🎉 WALESS GROUP Database Seeding Completed!');
 }
 
 main()

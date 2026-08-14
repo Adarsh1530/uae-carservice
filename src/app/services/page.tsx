@@ -61,10 +61,10 @@ export default function ServicesPage() {
               OUR CAPABILITIES
             </span>
             <h1 className="font-heading font-black text-4xl sm:text-6xl text-white tracking-tight">
-              SERVICES & <span className="text-brand-green">BESPOKE SOLUTIONS</span>
+              EXECUTIVE <span className="text-brand-green">SERVICES</span> & SOLUTIONS
             </h1>
             <p className="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-              Explore our master-level services designed for ultra-luxury automobiles, performance engineering, ceramic protection, and corporate VIP fleets.
+              Explore WALESS GROUP’s comprehensive suite of luxury automotive customization, performance engineering, paint protection, and corporate services.
             </p>
 
             {/* Search Input */}

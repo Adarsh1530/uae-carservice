@@ -162,7 +162,7 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6 p-4 rounded-xl bg-black/80 backdrop-blur-md border border-brand-green/30">
                       <span className="text-[10px] font-mono text-brand-green tracking-widest uppercase block">
-                        WHALESS GROUP UAE
+                        <span className="text-brand-green">WALESS GROUP</span> UAE
                       </span>
                       <h3 className="font-heading font-bold text-white text-sm">
                         Mastery in Automobile Artistry
@@ -183,7 +183,7 @@ export default function HomePage() {
                 <div className="relative h-96 sm:h-[450px] w-full rounded-2xl overflow-hidden border border-brand-border shadow-neon-sm">
                   <Image
                     src={settings?.aboutImageUrl || '/uploads/gallery__1_.jpg'}
-                    alt="WHALESS GROUP Headquarters"
+                    alt="WALESS GROUP Headquarters"
                     fill
                     className="object-cover"
                   />
@@ -193,13 +193,13 @@ export default function HomePage() {
 
               <div className="lg:col-span-6 space-y-6">
                 <span className="text-xs font-mono uppercase tracking-widest text-brand-green border-l-2 border-brand-green pl-3">
-                  ABOUT WHALESS GROUP
+                  ABOUT WALESS GROUP
                 </span>
                 <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
                   Crafting Extraordinary Automotive Standard in Ras Al Khaimah
                 </h2>
                 <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                  WHALESS GROUP stands as Ras Al Khaimah’s premier house for automotive refinement and executive solutions. Founded on principles of precision engineering, uncompromising quality, and stealth luxury aesthetics, we cater to discerning automobile owners, collectors, and corporate enterprises across the United Arab Emirates.
+                  WALESS GROUP stands as Ras Al Khaimah’s premier house for automotive refinement and executive solutions. Founded on principles of precision engineering, uncompromising quality, and stealth luxury aesthetics, we cater to discerning automobile owners, collectors, and corporate enterprises across the United Arab Emirates.
                 </p>
                 <div className="space-y-3 pt-2">
                   {[
@@ -362,7 +362,7 @@ export default function HomePage() {
                 THE WHALESS ADVANTAGE
               </span>
               <h2 className="font-heading font-black text-3xl sm:text-5xl text-white tracking-tight">
-                Why Clients Trust WHALESS GROUP
+                Why Clients Trust WALESS GROUP
               </h2>
             </div>
 

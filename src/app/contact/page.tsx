@@ -57,7 +57,7 @@ export default function ContactPage() {
               DIRECT CONCIERGE
             </span>
             <h1 className="font-heading font-black text-4xl sm:text-6xl text-white tracking-tight">
-              GET IN TOUCH WITH <span className="text-brand-green">WHALESS GROUP</span>
+              GET IN TOUCH WITH <span className="text-brand-green">WALESS GROUP</span>
             </h1>
             <p className="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
               Visit our headquarters in Ras Al Khaimah, schedule a private consultation, or connect directly with our client executive team.
@@ -74,7 +74,7 @@ export default function ContactPage() {
                 <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-brand-border shadow-neon-sm mb-6">
                   <Image
                     src={settings?.contactImageUrl || '/uploads/gallery__12_.jpg'}
-                    alt="WHALESS GROUP Contact Hub"
+                    alt="WALESS GROUP Contact Hub"
                     fill
                     className="object-cover"
                   />
@@ -192,7 +192,7 @@ export default function ContactPage() {
                     Schedule Your Visit or Vehicle Transport
                   </h3>
                   <p className="text-gray-300 text-sm leading-relaxed">
-                    WHALESS GROUP offers enclosed flatbed vehicle collection and delivery services across Ras Al Khaimah, Dubai, Abu Dhabi, and all northern Emirates.
+                    WALESS GROUP offers enclosed flatbed vehicle collection and delivery services across Ras Al Khaimah, Dubai, Abu Dhabi, and all northern Emirates.
                   </p>
                   <button
                     onClick={() => setBookingModalOpen(true)}

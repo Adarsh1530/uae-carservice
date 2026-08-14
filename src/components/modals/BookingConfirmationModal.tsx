@@ -55,7 +55,7 @@ export const BookingConfirmationModal: React.FC<BookingConfirmationModalProps> =
           </h2>
 
           <p className="text-gray-300 text-sm mt-2">
-            Your booking request has been received successfully by <strong className="text-white">WHALESS GROUP</strong>.
+            Your booking request has been received successfully by <strong className="text-white">WALESS GROUP</strong>.
           </p>
 
           {/* Details Card */}

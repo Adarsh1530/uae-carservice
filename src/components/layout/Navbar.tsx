@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
             </div>
             <div className="flex flex-col">
               <span className="font-heading font-extrabold text-xl tracking-widest text-white group-hover:text-brand-green transition-colors duration-300">
-                WHALESS<span className="text-brand-green ml-1.5">GROUP</span>
+                WALESS<span className="text-brand-green ml-1.5">GROUP</span>
               </span>
               <span className="text-[10px] tracking-[0.25em] text-brand-muted uppercase font-medium">
                 Ras Al Khaimah • UAE

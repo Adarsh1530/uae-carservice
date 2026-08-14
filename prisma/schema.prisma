@@ -21,7 +21,7 @@ model Admin {
 
 model SiteSettings {
   id              String   @id @default("default")
-  companyName     String   @default("WHALESS GROUP")
+  companyName     String   @default("WALESS GROUP")
   domain          String   @default("walessgroup.ae")
   phone           String   @default("+971 7 222 868")
   mobile1         String   @default("+971 54 307 2733")
@@ -34,12 +34,12 @@ model SiteSettings {
   mapLongitude    Float    @default(55.9525)
   mapZoom         Int      @default(14)
   heroHeading     String   @default("ELEVATING AUTOMOTIVE & CORPORATE EXCELLENCE IN UAE")
-  heroSubheading  String   @default("WHALESS GROUP delivers ultra-luxury bespoke vehicle customization, high-performance tuning, and elite corporate services across Ras Al Khaimah and the UAE.")
-  heroImageUrl    String   @default("/uploads/home-hero.jpg")
-  aboutImageUrl   String   @default("/uploads/about-main.jpg")
-  contactImageUrl String   @default("/uploads/contact-main.jpg")
-  seoTitle        String   @default("WHALESS GROUP | Luxury Automotive & Corporate Solutions UAE")
-  seoDescription  String   @default("WHALESS GROUP is Ras Al Khaimah's premier destination for luxury car customization, detailing, and bespoke corporate solutions. Contact us +971 7 222 868.")
+  heroSubheading  String   @default("WALESS GROUP delivers ultra-luxury bespoke vehicle customization, high-performance tuning, and elite corporate services across Ras Al Khaimah and the UAE.")
+  heroImageUrl    String   @default("/uploads/home_page.jpg")
+  aboutImageUrl   String   @default("/uploads/gallery__1_.jpg")
+  contactImageUrl String   @default("/uploads/gallery__12_.jpg")
+  seoTitle        String   @default("WALESS GROUP | Luxury Automotive & Corporate Solutions UAE")
+  seoDescription  String   @default("WALESS GROUP is Ras Al Khaimah's premier destination for luxury car customization, detailing, and bespoke corporate solutions. Contact us +971 7 222 868.")
   updatedAt       DateTime @updatedAt
 
   @@map("site_settings")

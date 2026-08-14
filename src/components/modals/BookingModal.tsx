@@ -139,7 +139,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             <div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-green/20 text-brand-green text-[11px] font-mono tracking-widest uppercase">
                 <Sparkles className="w-3.5 h-3.5" />
-                WHALESS GROUP BOOKING
+                WALESS GROUP BOOKING
               </span>
               <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-white mt-1">
                 Book An Appointment

@@ -6,7 +6,7 @@ import { SiteSettings } from '@/lib/types';
 
 const DEFAULT_SETTINGS: SiteSettings = {
   id: 'default',
-  companyName: 'WHALESS GROUP',
+  companyName: 'WALESS GROUP',
   domain: 'walessgroup.ae',
   phone: '+971 7 222 868',
   mobile1: '+971 54 307 2733',
@@ -19,12 +19,12 @@ const DEFAULT_SETTINGS: SiteSettings = {
   mapLongitude: 55.9525,
   mapZoom: 14,
   heroHeading: 'ELEVATING AUTOMOTIVE & CORPORATE EXCELLENCE IN UAE',
-  heroSubheading: 'WHALESS GROUP delivers ultra-luxury bespoke vehicle customization, high-performance tuning, and elite corporate services across Ras Al Khaimah and the UAE.',
+  heroSubheading: 'WALESS GROUP delivers ultra-luxury bespoke vehicle customization, high-performance tuning, and elite corporate services across Ras Al Khaimah and the UAE.',
   heroImageUrl: '/uploads/home_page.jpg',
   aboutImageUrl: '/uploads/gallery__1_.jpg',
   contactImageUrl: '/uploads/gallery__12_.jpg',
-  seoTitle: 'WHALESS GROUP | Luxury Automotive & Corporate Solutions UAE',
-  seoDescription: 'Official website of WHALESS GROUP, Ras Al Khaimah. Premium bespoke vehicle modifications, executive detailing, performance upgrades, and corporate services.',
+  seoTitle: 'WALESS GROUP | Luxury Automotive & Corporate Solutions UAE',
+  seoDescription: 'Official website of WALESS GROUP, Ras Al Khaimah. Premium bespoke vehicle modifications, executive detailing, performance upgrades, and corporate services.',
 };
 
 export default function AdminSettingsPage() {

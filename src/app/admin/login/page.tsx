@@ -48,79 +48,77 @@ export default function AdminLoginPage() {
           <div className="w-12 h-12 rounded-xl bg-brand-green/20 border border-brand-green flex items-center justify-center mx-auto mb-3 shadow-neon-md">
             <ShieldCheck className="w-6 h-6 text-brand-green" />
           </div>
-          <span className="text-[10px] font-mono tracking-widest text-brand-green uppercase">
-            WHALESS GROUP CMS
+          <span className="text-[10px] font-mono text-brand-green uppercase tracking-widest block font-semibold">
+            WALESS GROUP CMS
           </span>
-          <h1 className="font-heading font-black text-2xl text-white">Administrator Access</h1>
-          <p className="text-xs text-gray-400">
+          <h1 className="font-heading font-black text-2xl text-white tracking-tight mt-1">
+            Administrator Access
+          </h1>
+          <p className="text-xs text-gray-400 mt-1">
             Sign in to manage bookings, services, gallery, and site settings.
           </p>
         </div>
 
         {errorMsg && (
-          <div className="p-3 rounded-lg bg-red-950/60 border border-red-500/40 text-red-300 text-xs text-center font-medium">
+          <div className="p-3 rounded-xl bg-red-950/80 border border-red-500/50 text-red-300 text-xs text-center font-medium animate-pulse">
             {errorMsg}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-mono uppercase text-gray-300 mb-1.5">
+            <label className="block text-[11px] font-mono text-gray-300 uppercase mb-1">
               Username
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-3.5 w-4 h-4 text-brand-green" />
+              <User className="w-4 h-4 text-brand-green absolute left-3 top-3" />
               <input
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-black border border-brand-border text-white text-sm focus:border-brand-green focus:outline-none transition-all"
+                placeholder="Username"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs font-mono focus:border-brand-green focus:ring-1 focus:ring-brand-green"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono uppercase text-gray-300 mb-1.5">
+            <label className="block text-[11px] font-mono text-gray-300 uppercase mb-1">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-brand-green" />
+              <Lock className="w-4 h-4 text-brand-green absolute left-3 top-3" />
               <input
                 type="password"
                 required
-                placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-black border border-brand-border text-white text-sm focus:border-brand-green focus:outline-none transition-all"
+                placeholder="••••••••••••"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs font-mono focus:border-brand-green focus:ring-1 focus:ring-brand-green"
               />
             </div>
           </div>
 
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-brand-green text-black font-heading font-bold text-xs uppercase tracking-wider hover:bg-brand-greenLight shadow-neon-md transition-all disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>AUTHENTICATING...</span>
-                </>
-              ) : (
-                <>
-                  <span>SIGN IN TO DASHBOARD</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-brand-green text-black font-heading font-bold text-xs uppercase tracking-wider hover:bg-brand-greenLight shadow-neon-sm flex items-center justify-center gap-2 mt-4"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <span>SIGN IN TO DASHBOARD</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
         </form>
 
-        <div className="text-center pt-2">
+        <div className="pt-4 border-t border-brand-border/40 text-center">
           <span className="text-[10px] font-mono text-gray-500">
-            WHALESS GROUP • Ras Al Khaimah, UAE
+            WALESS GROUP • Ras Al Khaimah, UAE
           </span>
         </div>
       </div>

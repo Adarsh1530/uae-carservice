@@ -64,7 +64,7 @@ export function buildWhatsAppLink(
   // Clean phone number (strip spaces, +, -, etc.)
   const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
 
-  const text = `*WHALESS GROUP BOOKING*
+  const text = `*WALESS GROUP BOOKING*
 
 📌 *Reference ID:* ${booking.referenceId}
 🏎️ *Service:* ${booking.serviceName}

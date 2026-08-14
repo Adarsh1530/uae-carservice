@@ -36,7 +36,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
     <div className="relative w-full h-96 rounded-xl overflow-hidden border border-brand-border shadow-neon-sm bg-brand-surface group">
       {/* Dark Leaflet map iframe or OpenStreetMap view */}
       <iframe
-        title="WHALESS GROUP Location Map"
+        title="WALESS GROUP Location Map"
         width="100%"
         height="100%"
         style={{ border: 0, filter: 'invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%)' }}
@@ -51,7 +51,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
           <MapPin className="w-5 h-5 text-brand-green" />
         </div>
         <div className="flex-1">
-          <h4 className="font-heading font-bold text-white text-sm">WHALESS GROUP HEADQUARTERS</h4>
+          <h4 className="font-heading font-bold text-white text-sm">WALESS GROUP HEADQUARTERS</h4>
           <p className="text-xs text-gray-300 mt-1 leading-relaxed">{address}</p>
           <a
             href={googleMapsUrl}

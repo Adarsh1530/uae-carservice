@@ -31,7 +31,7 @@ export async function POST(req: Request) {
           data: {
             username: 'WALESSGROUP',
             passwordHash,
-            name: 'WHALESS GROUP Administrator',
+            name: 'WALESS GROUP Administrator',
             role: 'ADMIN',
           },
         });
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       success: true,
       user: {
         username: cleanUsername,
-        name: admin?.name || 'WHALESS GROUP Administrator',
+        name: admin?.name || 'WALESS GROUP Administrator',
         role: 'ADMIN',
       },
     });

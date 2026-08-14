@@ -12,7 +12,7 @@ export default function NotFound() {
         </span>
         <h1 className="font-heading font-black text-2xl text-white">PAGE NOT FOUND</h1>
         <p className="text-xs text-gray-400">
-          The requested page could not be located on the WHALESS GROUP platform.
+          The requested page could not be located on the WALESS GROUP platform.
         </p>
 
         <div className="pt-2">

@@ -45,7 +45,7 @@ export default function AboutPage() {
               WHO WE ARE
             </span>
             <h1 className="font-heading font-black text-4xl sm:text-6xl text-white tracking-tight mt-4">
-              ABOUT <span className="text-brand-green">WHALESS GROUP</span>
+              ABOUT <span className="text-brand-green">WALESS GROUP</span>
             </h1>
             <p className="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto mt-4 leading-relaxed">
               Ras Al Khaimah’s benchmark for bespoke luxury automobile transformation, performance tuning, and executive corporate consultancy.
@@ -61,7 +61,7 @@ export default function AboutPage() {
                 <div className="relative h-[420px] sm:h-[480px] w-full rounded-2xl overflow-hidden border border-brand-green/40 shadow-neon-md">
                   <Image
                     src={settings?.aboutImageUrl || '/uploads/gallery__1_.jpg'}
-                    alt="WHALESS GROUP Facility"
+                    alt="WALESS GROUP Facility"
                     fill
                     className="object-cover"
                     priority
@@ -78,7 +78,7 @@ export default function AboutPage() {
                   Pioneering Luxury & Engineering Excellence
                 </h2>
                 <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                  WHALESS GROUP was established to serve the upper echelon of automotive enthusiasts and corporate clients across the UAE. We believe that true luxury lies in absolute personalization, where engineering precision meets handcrafted artistic distinction.
+                  WALESS GROUP was established to serve the upper echelon of automotive enthusiasts and corporate clients across the UAE. We believe that true luxury lies in absolute personalization, where engineering precision meets handcrafted artistic distinction.
                 </p>
                 <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
                   Operating out of Al Dhait South, Ras Al Khaimah, our facility is equipped with high-tech diagnostic suites, climate-controlled clean rooms for ceramic/PPF application, and bespoke upholstery studios.
@@ -129,7 +129,7 @@ export default function AboutPage() {
         <section className="py-20 bg-black text-center">
           <div className="max-w-4xl mx-auto px-4 space-y-6">
             <h2 className="font-heading font-black text-3xl sm:text-4xl text-white">
-              Experience the WHALESS GROUP Distinction
+              Experience the WALESS GROUP Distinction
             </h2>
             <p className="text-gray-400 text-sm">
               Schedule a visit to our flagship center in Ras Al Khaimah or speak with our executive team today.

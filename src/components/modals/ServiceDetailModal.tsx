@@ -78,7 +78,7 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
             <div className="absolute bottom-6 left-6 right-6">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-green/20 border border-brand-green/50 text-brand-green font-mono text-xs uppercase tracking-wider mb-2">
                 <Sparkles className="w-3.5 h-3.5" />
-                WHALESS GROUP SERVICE
+                WALESS GROUP SERVICE
               </span>
               <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-white tracking-wide">
                 {service.name}

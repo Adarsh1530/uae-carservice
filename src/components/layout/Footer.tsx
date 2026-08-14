@@ -24,7 +24,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
                 <span className="font-heading font-black text-black text-xl">W</span>
               </div>
               <span className="font-heading font-extrabold text-2xl tracking-widest text-white">
-                WHALESS<span className="text-brand-green ml-1.5">GROUP</span>
+                WALESS<span className="text-brand-green ml-1.5">GROUP</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-gray-400">
@@ -125,7 +125,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
-          <p>© {new Date().getFullYear()} WHALESS GROUP. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} WALESS GROUP. All Rights Reserved.</p>
           <div className="flex items-center gap-6">
             <span>Ras Al Khaimah • UAE</span>
             <Link href="/admin/login" className="hover:text-brand-green transition-colors">
