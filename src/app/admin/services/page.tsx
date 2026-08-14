@@ -12,8 +12,7 @@ import {
   Upload,
   Eye,
   Loader2,
-  ArrowUp,
-  ArrowDown,
+  DollarSign,
   Sparkles,
 } from 'lucide-react';
 import { ServiceItem } from '@/lib/types';
@@ -67,7 +66,7 @@ export default function AdminServicesPage() {
       mainImage: '',
       additionalImagesStr: '',
       featuresStr: '',
-      priceInfo: 'Bespoke Quote Upon Request',
+      priceInfo: '250 AED',
       displayOrder: services.length + 1,
       active: true,
     });
@@ -201,7 +200,9 @@ export default function AdminServicesPage() {
       {loading ? (
         <div className="py-20 text-center text-gray-500 font-mono text-sm">Loading Services...</div>
       ) : services.length === 0 ? (
-        <div className="py-20 text-center text-gray-500 text-sm">No services added yet. Click &quot;Add New Service&quot; to begin.</div>
+        <div className="py-20 text-center text-gray-500 text-sm">
+          No services added yet. Click &quot;Add New Service&quot; to begin.
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((svc) => (
@@ -221,6 +222,11 @@ export default function AdminServicesPage() {
                       INACTIVE
                     </div>
                   )}
+                  {svc.priceInfo && (
+                    <div className="absolute bottom-2 left-2 px-3 py-1 rounded-full bg-black/85 backdrop-blur-md text-brand-green font-mono text-xs font-bold border border-brand-green/40 shadow-neon-sm">
+                      {svc.priceInfo}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -228,7 +234,9 @@ export default function AdminServicesPage() {
                     ORDER: #{svc.displayOrder}
                   </span>
                   <h3 className="font-heading font-bold text-lg text-white mt-0.5">{svc.name}</h3>
-                  <p className="text-xs text-gray-400 line-clamp-2 mt-1">{svc.shortDesc}</p>
+                  <p className="text-xs text-gray-400 line-clamp-2 mt-1">
+                    {svc.shortDesc || 'Bespoke WALESS GROUP Executive Service'}
+                  </p>
                 </div>
               </div>
 
@@ -281,6 +289,7 @@ export default function AdminServicesPage() {
                   <input
                     type="text"
                     required
+                    placeholder="e.g. Car Wash with Polish"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green focus:outline-none"
@@ -301,6 +310,24 @@ export default function AdminServicesPage() {
                 </div>
               </div>
 
+              {/* Price in UAE Currency (AED) */}
+              <div className="p-4 rounded-xl bg-black/60 border border-brand-green/30 space-y-2">
+                <label className="block text-xs font-mono uppercase text-brand-green font-bold flex items-center gap-1.5">
+                  <DollarSign className="w-4 h-4 text-brand-green" />
+                  <span>PRICE IN UAE CURRENCY (AED)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 250 AED or 500 AED or Quote Upon Request"
+                  value={formData.priceInfo}
+                  onChange={(e) => setFormData({ ...formData, priceInfo: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-brand-green font-mono font-bold text-sm focus:border-brand-green focus:outline-none"
+                />
+                <span className="text-[10px] text-gray-400 block">
+                  Enter amount in UAE Dirhams (AED) or custom pricing description (e.g. 250 AED).
+                </span>
+              </div>
+
               <div>
                 <label className="block text-xs font-mono uppercase text-gray-300 mb-1">
                   Main Image URL *
@@ -309,24 +336,26 @@ export default function AdminServicesPage() {
                   <input
                     type="text"
                     required
+                    placeholder="Upload image or paste URL"
                     value={formData.mainImage}
                     onChange={(e) => setFormData({ ...formData, mainImage: e.target.value })}
                     className="flex-1 px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green focus:outline-none"
                   />
-                  <label className="cursor-pointer px-4 py-2.5 rounded-xl bg-brand-surface border border-brand-green text-brand-green text-xs font-heading font-bold hover:bg-brand-green hover:text-black transition-all">
+                  <label className="cursor-pointer px-4 py-2.5 rounded-xl bg-brand-surface border border-brand-green text-brand-green text-xs font-heading font-bold hover:bg-brand-green hover:text-black transition-all flex items-center gap-1.5">
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    <span>UPLOAD</span>
                     <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase text-gray-300 mb-1">
-                  Short Summary *
+                <label className="block text-xs font-mono uppercase text-gray-400 mb-1">
+                  Short Summary <span className="text-gray-500">(Optional)</span>
                 </label>
                 <textarea
-                  required
                   rows={2}
+                  placeholder="Optional brief description of the service..."
                   value={formData.shortDesc}
                   onChange={(e) => setFormData({ ...formData, shortDesc: e.target.value })}
                   className="w-full p-3 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green focus:outline-none"
@@ -334,12 +363,12 @@ export default function AdminServicesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase text-gray-300 mb-1">
-                  Full Detailed Description *
+                <label className="block text-xs font-mono uppercase text-gray-400 mb-1">
+                  Full Detailed Description <span className="text-gray-500">(Optional)</span>
                 </label>
                 <textarea
-                  required
-                  rows={4}
+                  rows={3}
+                  placeholder="Optional detailed service description..."
                   value={formData.detailedDesc}
                   onChange={(e) => setFormData({ ...formData, detailedDesc: e.target.value })}
                   className="w-full p-3 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green focus:outline-none"
@@ -352,14 +381,14 @@ export default function AdminServicesPage() {
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Custom Aero Widebody Kit&#10;Handcrafted Leather Interior"
+                  placeholder="Full Exterior Wash & Polish&#10;Interior Deep Cleaning&#10;Paint Protection Sealant"
                   value={formData.featuresStr}
                   onChange={(e) => setFormData({ ...formData, featuresStr: e.target.value })}
                   className="w-full p-3 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
                 <div>
                   <label className="block text-xs font-mono uppercase text-gray-300 mb-1">
                     Display Order
@@ -367,19 +396,7 @@ export default function AdminServicesPage() {
                   <input
                     type="number"
                     value={formData.displayOrder}
-                    onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) })}
-                    className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-mono uppercase text-gray-300 mb-1">
-                    Price Info
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.priceInfo}
-                    onChange={(e) => setFormData({ ...formData, priceInfo: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 1 })}
                     className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green focus:outline-none"
                   />
                 </div>
@@ -390,19 +407,19 @@ export default function AdminServicesPage() {
                     id="activeToggle"
                     checked={formData.active}
                     onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                    className="w-4 h-4 accent-brand-green"
+                    className="w-4 h-4 accent-brand-green cursor-pointer"
                   />
-                  <label htmlFor="activeToggle" className="text-xs font-heading uppercase text-white cursor-pointer">
+                  <label htmlFor="activeToggle" className="text-xs font-heading uppercase text-white cursor-pointer select-none">
                     Active / Published
                   </label>
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end gap-3">
+              <div className="pt-4 flex justify-end gap-3 border-t border-brand-border/40">
                 <button
                   type="button"
                   onClick={() => setFormOpen(false)}
-                  className="px-5 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs font-heading"
+                  className="px-5 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs font-heading hover:bg-gray-900"
                 >
                   Cancel
                 </button>

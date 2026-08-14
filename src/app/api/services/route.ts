@@ -17,7 +17,6 @@ export async function GET(req: Request) {
       orderBy: { displayOrder: 'asc' },
     });
 
-    // Parse JSON string fields
     const parsed = services.map((s) => ({
       ...s,
       additionalImages: JSON.parse(s.additionalImages || '[]'),
@@ -41,38 +40,49 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, slug, shortDesc, detailedDesc, mainImage, additionalImages, features, priceInfo, displayOrder, active } = body;
 
-    if (!name || !shortDesc || !detailedDesc || !mainImage) {
-      return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+    // Only Service Name and Main Image are strictly required
+    if (!name || !mainImage) {
+      return NextResponse.json({ success: false, error: 'Service name and main image are required' }, { status: 400 });
     }
 
-    const generatedSlug = slug
+    const generatedSlug = slug && slug.trim()
       ? slug.toLowerCase().replace(/[^a-z0-9-]/g, '-')
       : name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+
+    const finalShortDesc = shortDesc && shortDesc.trim()
+      ? shortDesc.trim()
+      : `${name} - Executive WALESS GROUP Service`;
+
+    const finalDetailedDesc = detailedDesc && detailedDesc.trim()
+      ? detailedDesc.trim()
+      : finalShortDesc;
 
     const created = await db.service.create({
       data: {
         name,
         slug: generatedSlug,
-        shortDesc,
-        detailedDesc,
+        shortDesc: finalShortDesc,
+        detailedDesc: finalDetailedDesc,
         mainImage,
         additionalImages: JSON.stringify(Array.isArray(additionalImages) ? additionalImages : []),
         features: JSON.stringify(Array.isArray(features) ? features : []),
-        priceInfo: priceInfo || null,
+        priceInfo: priceInfo && priceInfo.trim() ? priceInfo.trim() : 'Bespoke Quote Upon Request',
         displayOrder: parseInt(displayOrder) || 0,
         active: active !== undefined ? Boolean(active) : true,
       },
     });
 
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: 'CREATE_SERVICE',
-        entityType: 'Service',
-        entityId: created.id,
-        metadata: JSON.stringify({ name: created.name }),
-      },
-    });
+    try {
+      await db.auditLog.create({
+        data: {
+          adminUsername: session.username,
+          action: 'CREATE_SERVICE',
+          entityType: 'Service',
+          entityId: created.id,
+          metadata: JSON.stringify({ name: created.name }),
+        },
+      });
+    } catch (auditErr) {}
 
     return NextResponse.json({ success: true, service: created });
   } catch (error) {
@@ -95,30 +105,40 @@ export async function PUT(req: Request) {
       return NextResponse.json({ success: false, error: 'Service ID is required' }, { status: 400 });
     }
 
+    const finalShortDesc = shortDesc && shortDesc.trim()
+      ? shortDesc.trim()
+      : name ? `${name} - Executive WALESS GROUP Service` : undefined;
+
+    const finalDetailedDesc = detailedDesc && detailedDesc.trim()
+      ? detailedDesc.trim()
+      : finalShortDesc;
+
     const updated = await db.service.update({
       where: { id },
       data: {
-        name,
+        name: name || undefined,
         slug: slug ? slug.toLowerCase().replace(/[^a-z0-9-]/g, '-') : undefined,
-        shortDesc,
-        detailedDesc,
-        mainImage,
+        shortDesc: finalShortDesc,
+        detailedDesc: finalDetailedDesc,
+        mainImage: mainImage || undefined,
         additionalImages: Array.isArray(additionalImages) ? JSON.stringify(additionalImages) : undefined,
         features: Array.isArray(features) ? JSON.stringify(features) : undefined,
-        priceInfo,
+        priceInfo: priceInfo || undefined,
         displayOrder: displayOrder !== undefined ? parseInt(displayOrder) : undefined,
         active: active !== undefined ? Boolean(active) : undefined,
       },
     });
 
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: 'UPDATE_SERVICE',
-        entityType: 'Service',
-        entityId: updated.id,
-      },
-    });
+    try {
+      await db.auditLog.create({
+        data: {
+          adminUsername: session.username,
+          action: 'UPDATE_SERVICE',
+          entityType: 'Service',
+          entityId: updated.id,
+        },
+      });
+    } catch (auditErr) {}
 
     return NextResponse.json({ success: true, service: updated });
   } catch (error) {
@@ -145,14 +165,16 @@ export async function DELETE(req: Request) {
       where: { id },
     });
 
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: 'DELETE_SERVICE',
-        entityType: 'Service',
-        entityId: id,
-      },
-    });
+    try {
+      await db.auditLog.create({
+        data: {
+          adminUsername: session.username,
+          action: 'DELETE_SERVICE',
+          entityType: 'Service',
+          entityId: id,
+        },
+      });
+    } catch (auditErr) {}
 
     return NextResponse.json({ success: true, message: 'Service deleted successfully' });
   } catch (error) {
