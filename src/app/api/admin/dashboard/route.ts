@@ -11,37 +11,20 @@ export async function GET() {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const [
-      totalBookings,
-      pendingBookings,
-      acceptedBookings,
-      rejectedBookings,
-      totalServices,
-      totalGallery,
-      totalMedia,
-      recentBookings,
-      recentLogs,
-    ] = await Promise.all([
-      db.booking.count(),
-      db.booking.count({ where: { status: 'PENDING' } }),
-      db.booking.count({ where: { status: 'ACCEPTED' } }),
-      db.booking.count({ where: { status: 'REJECTED' } }),
-      db.service.count(),
-      db.galleryImage.count(),
-      db.media.count(),
-      db.booking.findMany({
-        take: 6,
-        orderBy: { createdAt: 'desc' },
-      }),
-      db.auditLog.findMany({
-        take: 8,
-        orderBy: { createdAt: 'desc' },
-      }),
-    ]);
+    let stats = {
+      totalBookings: 0,
+      pendingBookings: 0,
+      acceptedBookings: 0,
+      rejectedBookings: 0,
+      totalServices: 0,
+      totalGallery: 0,
+      totalMedia: 0,
+    };
+    let recentBookings: any[] = [];
+    let recentLogs: any[] = [];
 
-    return NextResponse.json({
-      success: true,
-      stats: {
+    try {
+      const [
         totalBookings,
         pendingBookings,
         acceptedBookings,
@@ -49,7 +32,38 @@ export async function GET() {
         totalServices,
         totalGallery,
         totalMedia,
-      },
+        bookingsList,
+        logsList,
+      ] = await Promise.all([
+        db.booking.count(),
+        db.booking.count({ where: { status: 'PENDING' } }),
+        db.booking.count({ where: { status: 'ACCEPTED' } }),
+        db.booking.count({ where: { status: 'REJECTED' } }),
+        db.service.count(),
+        db.galleryImage.count(),
+        db.media.count(),
+        db.booking.findMany({ take: 6, orderBy: { createdAt: 'desc' } }),
+        db.auditLog.findMany({ take: 8, orderBy: { createdAt: 'desc' } }),
+      ]);
+
+      stats = {
+        totalBookings,
+        pendingBookings,
+        acceptedBookings,
+        rejectedBookings,
+        totalServices,
+        totalGallery,
+        totalMedia,
+      };
+      recentBookings = bookingsList;
+      recentLogs = logsList;
+    } catch (dbError) {
+      console.warn('Dashboard DB query fallback:', dbError);
+    }
+
+    return NextResponse.json({
+      success: true,
+      stats,
       recentBookings,
       recentLogs,
     });
