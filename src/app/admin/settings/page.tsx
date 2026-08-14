@@ -4,8 +4,31 @@ import React, { useEffect, useState } from 'react';
 import { Settings, Save, Loader2, CheckCircle2 } from 'lucide-react';
 import { SiteSettings } from '@/lib/types';
 
+const DEFAULT_SETTINGS: SiteSettings = {
+  id: 'default',
+  companyName: 'WHALESS GROUP',
+  domain: 'walessgroup.ae',
+  phone: '+971 7 222 868',
+  mobile1: '+971 54 307 2733',
+  mobile2: '+971 54 307 2711',
+  address: 'AL DHAIT SOUTH, RAS AL KHAIMAH, UNITED ARAB EMIRATES',
+  instagram: '@waless_group',
+  whatsapp1: '+971543072733',
+  whatsapp2: '+971543072711',
+  mapLatitude: 25.7533,
+  mapLongitude: 55.9525,
+  mapZoom: 14,
+  heroHeading: 'ELEVATING AUTOMOTIVE & CORPORATE EXCELLENCE IN UAE',
+  heroSubheading: 'WHALESS GROUP delivers ultra-luxury bespoke vehicle customization, high-performance tuning, and elite corporate services across Ras Al Khaimah and the UAE.',
+  heroImageUrl: '/uploads/home_page.jpg',
+  aboutImageUrl: '/uploads/gallery__1_.jpg',
+  contactImageUrl: '/uploads/gallery__12_.jpg',
+  seoTitle: 'WHALESS GROUP | Luxury Automotive & Corporate Solutions UAE',
+  seoDescription: 'Official website of WHALESS GROUP, Ras Al Khaimah. Premium bespoke vehicle modifications, executive detailing, performance upgrades, and corporate services.',
+};
+
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -14,14 +37,16 @@ export default function AdminSettingsPage() {
     fetch('/api/site-settings')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setSettings(data.settings);
+        if (data.success && data.settings) {
+          setSettings(data.settings);
+        }
       })
+      .catch((e) => console.warn('Fetch site settings error:', e))
       .finally(() => setLoading(false));
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!settings) return;
     setSaving(true);
     setSuccessMsg('');
 
@@ -35,6 +60,7 @@ export default function AdminSettingsPage() {
       const data = await res.json();
       if (data.success) {
         setSuccessMsg('Site settings updated successfully!');
+        if (data.settings) setSettings(data.settings);
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
         alert(data.error || 'Failed to update settings');
@@ -46,7 +72,7 @@ export default function AdminSettingsPage() {
     }
   };
 
-  if (loading || !settings) {
+  if (loading) {
     return <div className="py-20 text-center text-gray-500 font-mono text-sm">Loading Settings...</div>;
   }
 
@@ -195,7 +221,7 @@ export default function AdminSettingsPage() {
                 type="number"
                 step="0.00001"
                 value={settings.mapLatitude}
-                onChange={(e) => setSettings({ ...settings, mapLatitude: parseFloat(e.target.value) })}
+                onChange={(e) => setSettings({ ...settings, mapLatitude: parseFloat(e.target.value) || 25.7533 })}
                 className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green"
               />
             </div>
@@ -205,7 +231,7 @@ export default function AdminSettingsPage() {
                 type="number"
                 step="0.00001"
                 value={settings.mapLongitude}
-                onChange={(e) => setSettings({ ...settings, mapLongitude: parseFloat(e.target.value) })}
+                onChange={(e) => setSettings({ ...settings, mapLongitude: parseFloat(e.target.value) || 55.9525 })}
                 className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green"
               />
             </div>
@@ -214,7 +240,7 @@ export default function AdminSettingsPage() {
               <input
                 type="number"
                 value={settings.mapZoom}
-                onChange={(e) => setSettings({ ...settings, mapZoom: parseInt(e.target.value) })}
+                onChange={(e) => setSettings({ ...settings, mapZoom: parseInt(e.target.value) || 14 })}
                 className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green"
               />
             </div>
