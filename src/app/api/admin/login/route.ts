@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { setAdminSession, verifyPassword, hashPassword } from '@/lib/auth';
+import { createSessionToken, verifyPassword, hashPassword, COOKIE_NAME } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
@@ -52,11 +52,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
     }
 
-    await setAdminSession({
+    const adminPayload = {
       id: admin?.id || 'admin-bootstrap-id',
       username: cleanUsername,
       role: 'ADMIN',
-    });
+    };
+
+    const token = await createSessionToken(adminPayload);
 
     try {
       await db.auditLog.create({
@@ -71,7 +73,7 @@ export async function POST(req: Request) {
       // Non-critical audit log error
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: {
         username: cleanUsername,
@@ -79,8 +81,21 @@ export async function POST(req: Request) {
         role: 'ADMIN',
       },
     });
-  } catch (error) {
+
+    response.cookies.set(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24, // 1 day
+    });
+
+    return response;
+  } catch (error: any) {
     console.error('Error logging in admin:', error);
-    return NextResponse.json({ success: false, error: 'Server authentication error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Server authentication error' },
+      { status: 500 }
+    );
   }
 }

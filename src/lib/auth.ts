@@ -1,13 +1,13 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { db } from './db';
+import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
 const SECRET_KEY = new TextEncoder().encode(
   process.env.AUTH_SECRET || 'whaless-group-production-secret-key-2026-uae-secure-token-998877'
 );
 
-const COOKIE_NAME = 'whaless_admin_token';
+export const COOKIE_NAME = 'whaless_admin_token';
 const EXPIRATION_TIME = '24h';
 
 export interface AdminPayload {
@@ -33,18 +33,6 @@ export async function verifySessionToken(token: string): Promise<AdminPayload | 
   }
 }
 
-export async function setAdminSession(admin: AdminPayload) {
-  const token = await createSessionToken(admin);
-  const cookieStore = cookies();
-  cookieStore.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 60 * 24, // 1 day
-  });
-}
-
 export async function getAdminSession(): Promise<AdminPayload | null> {
   const cookieStore = cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
@@ -52,7 +40,11 @@ export async function getAdminSession(): Promise<AdminPayload | null> {
   return await verifySessionToken(token);
 }
 
-export async function clearAdminSession() {
+export async function clearAdminSession(response?: NextResponse) {
+  if (response) {
+    response.cookies.delete(COOKIE_NAME);
+    return response;
+  }
   const cookieStore = cookies();
   cookieStore.delete(COOKIE_NAME);
 }
