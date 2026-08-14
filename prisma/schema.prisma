@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model SiteSettings {
+  id              String   @id @default("default")
+  companyName     String   @default("WHALESS GROUP")
+  domain          String   @default("walessgroup.ae")
+  phone           String   @default("+971 7 222 868")
+  mobile1         String   @default("+971 54 307 2733")
+  mobile2         String   @default("+971 54 307 2711")
+  address         String   @default("AL DHAIT SOUTH, RAS AL KHAIMAH, UNITED ARAB EMIRATES")
+  instagram       String   @default("@waless_group")
+  whatsapp1       String   @default("+971543072733")
+  whatsapp2       String   @default("+971543072711")
+  mapLatitude     Float    @default(25.7533)
+  mapLongitude    Float    @default(55.9525)
+  mapZoom         Int      @default(14)
+  heroHeading     String   @default("ELEVATING AUTOMOTIVE & CORPORATE EXCELLENCE IN UAE")
+  heroSubheading  String   @default("WHALESS GROUP delivers ultra-luxury bespoke vehicle customization, high-performance tuning, and elite corporate services across Ras Al Khaimah and the UAE.")
+  heroImageUrl    String   @default("/uploads/home-hero.jpg")
+  aboutImageUrl   String   @default("/uploads/about-main.jpg")
+  contactImageUrl String   @default("/uploads/contact-main.jpg")
+  seoTitle        String   @default("WHALESS GROUP | Luxury Automotive & Corporate Solutions UAE")
+  seoDescription  String   @default("WHALESS GROUP is Ras Al Khaimah's premier destination for luxury car customization, detailing, and bespoke corporate solutions. Contact us +971 7 222 868.")
+  updatedAt       DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model Service {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  name             String
+  shortDesc        String
+  detailedDesc     String
+  mainImage        String
+  additionalImages String   @default("[]")
+  features         String   @default("[]")
+  priceInfo        String?
+  displayOrder     Int      @default(0)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("services")
+}
+
+model GalleryImage {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  imageUrl     String
+  category     String   @default("General")
+  displayOrder Int      @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@map("gallery_images")
+}
+
+model Booking {
+  id              String    @id @default(cuid())
+  referenceId     String    @unique
+  serviceId       String
+  serviceName     String
+  fullName        String
+  address         String
+  phone           String
+  description     String?
+  requestedDate   String
+  status          String    @default("PENDING")
+  rejectionReason String?
+  acceptedAt      DateTime?
+  rejectedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("bookings")
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  size      Int
+  mimeType  String
+  category  String   @default("General")
+  createdAt DateTime @default(now())
+
+  @@map("media")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  adminUsername String
+  action        String
+  entityType    String
+  entityId      String?
+  metadata      String?
+  createdAt     DateTime @default(now())
+
+  @@map("audit_logs")
+}
