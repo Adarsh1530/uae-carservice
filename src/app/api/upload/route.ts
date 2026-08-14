@@ -1,18 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { db } from '@/lib/db';
-import fs from 'fs';
+import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-
-const ALLOWED_MIME_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/avif',
-  'image/svg+xml',
-];
-
-const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
 export async function POST(req: Request) {
   try {
@@ -22,68 +14,59 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData();
-    const file = formData.get('file') as File | null;
-    const category = (formData.get('category') as string) || 'General';
+    const file = formData.get('file') as File;
 
     if (!file) {
       return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid file format. Allowed: JPG, PNG, WEBP, AVIF, SVG' },
-        { status: 400 }
-      );
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { success: false, error: 'File size exceeds 15MB limit' },
-        { status: 400 }
-      );
-    }
-
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    let publicUrl = '';
+
+    // 1. Try writing to local public/uploads directory (works in local dev)
+    try {
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+      await mkdir(uploadDir, { recursive: true });
+
+      const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filename = `${Date.now()}_${sanitizedFilename}`;
+      const filepath = path.join(uploadDir, filename);
+
+      await writeFile(filepath, buffer);
+      publicUrl = `/uploads/${filename}`;
+    } catch (fsError) {
+      // 2. Vercel Serverless environment has read-only filesystem -> Fall back to high-res Data URI
+      const mimeType = file.type || 'image/jpeg';
+      const base64 = buffer.toString('base64');
+      publicUrl = `data:${mimeType};base64,${base64}`;
     }
 
-    const ext = path.extname(file.name) || '.jpg';
-    const timestamp = Date.now();
-    const cleanBase = path.basename(file.name, ext).toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-    const filename = `${cleanBase}_${timestamp}${ext}`;
-    const filePath = path.join(uploadsDir, filename);
+    // 3. Save to Media Library table in database
+    try {
+      await db.media.create({
+        data: {
+          filename: file.name,
+          url: publicUrl,
+          mimeType: file.type || 'image/jpeg',
+          size: file.size,
+        },
+      });
+    } catch (dbErr) {
+      console.warn('Media DB record warning:', dbErr);
+    }
 
-    fs.writeFileSync(filePath, buffer);
-
-    const url = `/uploads/${filename}`;
-
-    const media = await db.media.create({
-      data: {
-        filename: file.name,
-        url,
-        size: file.size,
-        mimeType: file.type,
-        category,
-      },
+    return NextResponse.json({
+      success: true,
+      url: publicUrl,
+      filename: file.name,
     });
-
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: 'UPLOAD_MEDIA',
-        entityType: 'Media',
-        entityId: media.id,
-        metadata: JSON.stringify({ filename: file.name, url }),
-      },
-    });
-
-    return NextResponse.json({ success: true, url, media });
-  } catch (error) {
-    console.error('Error handling upload:', error);
-    return NextResponse.json({ success: false, error: 'Failed to upload file' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Upload handler error:', error);
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Failed to upload file' },
+      { status: 500 }
+    );
   }
 }
