@@ -40,14 +40,25 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, slug, shortDesc, detailedDesc, mainImage, additionalImages, features, priceInfo, displayOrder, active } = body;
 
-    // Only Service Name and Main Image are strictly required
     if (!name || !mainImage) {
       return NextResponse.json({ success: false, error: 'Service name and main image are required' }, { status: 400 });
     }
 
-    const generatedSlug = slug && slug.trim()
-      ? slug.toLowerCase().replace(/[^a-z0-9-]/g, '-')
-      : name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    let generatedSlug = slug && slug.trim()
+      ? slug.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-')
+      : name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+
+    if (!generatedSlug || generatedSlug === '-') {
+      generatedSlug = `service-${Date.now()}`;
+    }
+
+    // Check slug collision and ensure unique slug
+    try {
+      const existing = await db.service.findUnique({ where: { slug: generatedSlug } });
+      if (existing) {
+        generatedSlug = `${generatedSlug}-${Date.now().toString().slice(-4)}`;
+      }
+    } catch (e) {}
 
     const finalShortDesc = shortDesc && shortDesc.trim()
       ? shortDesc.trim()
@@ -57,17 +68,23 @@ export async function POST(req: Request) {
       ? detailedDesc.trim()
       : finalShortDesc;
 
+    // Clean price string format (e.g. 300 -> 300 AED if raw number)
+    let formattedPrice = priceInfo && priceInfo.trim() ? priceInfo.trim() : 'Bespoke Quote Upon Request';
+    if (/^\d+$/.test(formattedPrice)) {
+      formattedPrice = `${formattedPrice} AED`;
+    }
+
     const created = await db.service.create({
       data: {
-        name,
+        name: name.trim(),
         slug: generatedSlug,
         shortDesc: finalShortDesc,
         detailedDesc: finalDetailedDesc,
         mainImage,
         additionalImages: JSON.stringify(Array.isArray(additionalImages) ? additionalImages : []),
         features: JSON.stringify(Array.isArray(features) ? features : []),
-        priceInfo: priceInfo && priceInfo.trim() ? priceInfo.trim() : 'Bespoke Quote Upon Request',
-        displayOrder: parseInt(displayOrder) || 0,
+        priceInfo: formattedPrice,
+        displayOrder: parseInt(displayOrder) || 1,
         active: active !== undefined ? Boolean(active) : true,
       },
     });
@@ -85,9 +102,12 @@ export async function POST(req: Request) {
     } catch (auditErr) {}
 
     return NextResponse.json({ success: true, service: created });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating service:', error);
-    return NextResponse.json({ success: false, error: 'Failed to create service' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Failed to create service' },
+      { status: 500 }
+    );
   }
 }
 
@@ -113,17 +133,22 @@ export async function PUT(req: Request) {
       ? detailedDesc.trim()
       : finalShortDesc;
 
+    let formattedPrice = priceInfo && priceInfo.trim() ? priceInfo.trim() : undefined;
+    if (formattedPrice && /^\d+$/.test(formattedPrice)) {
+      formattedPrice = `${formattedPrice} AED`;
+    }
+
     const updated = await db.service.update({
       where: { id },
       data: {
-        name: name || undefined,
-        slug: slug ? slug.toLowerCase().replace(/[^a-z0-9-]/g, '-') : undefined,
+        name: name ? name.trim() : undefined,
+        slug: slug ? slug.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-') : undefined,
         shortDesc: finalShortDesc,
         detailedDesc: finalDetailedDesc,
         mainImage: mainImage || undefined,
         additionalImages: Array.isArray(additionalImages) ? JSON.stringify(additionalImages) : undefined,
         features: Array.isArray(features) ? JSON.stringify(features) : undefined,
-        priceInfo: priceInfo || undefined,
+        priceInfo: formattedPrice,
         displayOrder: displayOrder !== undefined ? parseInt(displayOrder) : undefined,
         active: active !== undefined ? Boolean(active) : undefined,
       },
@@ -141,9 +166,12 @@ export async function PUT(req: Request) {
     } catch (auditErr) {}
 
     return NextResponse.json({ success: true, service: updated });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating service:', error);
-    return NextResponse.json({ success: false, error: 'Failed to update service' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Failed to update service' },
+      { status: 500 }
+    );
   }
 }
 
@@ -177,8 +205,11 @@ export async function DELETE(req: Request) {
     } catch (auditErr) {}
 
     return NextResponse.json({ success: true, message: 'Service deleted successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting service:', error);
-    return NextResponse.json({ success: false, error: 'Failed to delete service' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Failed to delete service' },
+      { status: 500 }
+    );
   }
 }
