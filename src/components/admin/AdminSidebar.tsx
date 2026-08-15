@@ -12,9 +12,7 @@ import {
   Settings,
   User,
   LogOut,
-  ChevronDown,
   Globe,
-  ShieldCheck,
   Menu,
   X,
 } from 'lucide-react';
@@ -22,7 +20,6 @@ import {
 export const AdminSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const [websiteOpen, setWebsiteOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -52,9 +49,9 @@ export const AdminSidebar = () => {
           <div className="w-8 h-8 rounded-lg bg-brand-green flex items-center justify-center font-bold text-black text-sm">
             W
           </div>
-            <span className="font-heading font-black text-sm tracking-wider text-white group-hover:text-brand-green transition-colors">
-              WALESS <span className="text-brand-green">ADMIN</span>
-            </span>
+          <span className="font-heading font-black text-sm tracking-wider text-white">
+            WALESS <span className="text-brand-green">ADMIN</span>
+          </span>
         </div>
 
         <button
@@ -80,7 +77,7 @@ export const AdminSidebar = () => {
               </div>
               <div>
                 <span className="font-heading font-extrabold text-white text-base tracking-wider block">
-                  WHALESS<span className="text-brand-green ml-1">ADMIN</span>
+                  WALESS<span className="text-brand-green ml-1">ADMIN</span>
                 </span>
                 <span className="text-[10px] font-mono text-brand-muted uppercase">CMS Control Center</span>
               </div>

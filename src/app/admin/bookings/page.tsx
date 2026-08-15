@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useEffect, useState } from 'react';
 import {
   Search,
@@ -46,9 +48,10 @@ export default function AdminBookingsPage() {
       limit: '20',
       status: statusFilter,
       search: searchQuery,
+      _t: String(Date.now()), // Anti-cache buster
     });
 
-    fetch(`/api/bookings?${params}`)
+    fetch(`/api/bookings?${params}`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
