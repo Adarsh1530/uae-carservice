@@ -37,33 +37,20 @@ export async function POST(req: Request) {
     const created = await db.booking.create({
       data: {
         referenceId,
-        clientName: validated.fullName,
-        clientEmail: 'client@walessgroup.ae',
-        clientPhone: validated.phone,
-        clientAddress: validated.address,
+        serviceId: validated.serviceId || 'svc-general',
         serviceName: validated.serviceName,
-        preferredDate: validated.requestedDate,
-        specialNotes: validated.description || null,
+        fullName: validated.fullName,
+        address: validated.address,
+        phone: validated.phone,
+        requestedDate: validated.requestedDate,
+        description: validated.description || null,
         status: 'PENDING',
       },
     });
 
-    const responseBooking = {
-      id: created.id,
-      referenceId: created.referenceId,
-      fullName: created.clientName,
-      phone: created.clientPhone,
-      address: created.clientAddress,
-      serviceName: created.serviceName,
-      requestedDate: created.preferredDate,
-      description: created.specialNotes,
-      status: created.status,
-      createdAt: created.createdAt,
-    };
-
     return NextResponse.json({
       success: true,
-      booking: responseBooking,
+      booking: created,
       message: 'Booking successfully submitted.',
     });
   } catch (error: any) {
@@ -104,16 +91,16 @@ export async function GET(req: Request) {
       const query = search.trim();
       where.OR = [
         { referenceId: { contains: query } },
-        { clientName: { contains: query } },
-        { clientPhone: { contains: query } },
+        { fullName: { contains: query } },
+        { phone: { contains: query } },
         { serviceName: { contains: query } },
       ];
     }
 
-    let rawBookings: any[] = [];
+    let bookings: any[] = [];
     let total = 0;
     try {
-      [rawBookings, total] = await Promise.all([
+      [bookings, total] = await Promise.all([
         db.booking.findMany({
           where,
           orderBy: { createdAt: 'desc' },
@@ -125,20 +112,6 @@ export async function GET(req: Request) {
     } catch (e) {
       console.warn('DB bookings fetch fallback:', e);
     }
-
-    const bookings = rawBookings.map((b) => ({
-      id: b.id,
-      referenceId: b.referenceId,
-      fullName: b.clientName,
-      phone: b.clientPhone,
-      address: b.clientAddress,
-      serviceName: b.serviceName,
-      requestedDate: b.preferredDate,
-      description: b.specialNotes,
-      status: b.status,
-      rejectionReason: b.rejectionReason,
-      createdAt: b.createdAt,
-    }));
 
     const totalPages = Math.max(1, Math.ceil(total / limit));
 
@@ -182,6 +155,7 @@ export async function PUT(req: Request) {
     if (action === 'ACCEPT') {
       updateData = {
         status: 'ACCEPTED',
+        acceptedAt: new Date(),
       };
     } else if (action === 'REJECT') {
       if (!rejectionReason || !rejectionReason.trim()) {
@@ -189,6 +163,7 @@ export async function PUT(req: Request) {
       }
       updateData = {
         status: 'REJECTED',
+        rejectedAt: new Date(),
         rejectionReason: rejectionReason.trim(),
       };
     } else if (['CANCELLED', 'COMPLETED', 'PENDING'].includes(action)) {
