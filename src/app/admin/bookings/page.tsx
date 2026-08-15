@@ -3,23 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import {
   Search,
-  Filter,
   Eye,
   CheckCircle,
   XCircle,
-  Calendar,
-  Phone,
-  MapPin,
-  User,
-  Clock,
-  X,
-  Loader2,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck,
-  FileText,
+  X,
+  MessageSquare,
+  ExternalLink,
 } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
+import { formatDate, buildAcceptWhatsAppUrl, buildRejectWhatsAppUrl } from '@/lib/utils';
 import { BookingItem } from '@/lib/types';
 
 export default function AdminBookingsPage() {
@@ -35,6 +28,13 @@ export default function AdminBookingsPage() {
   const [rejectModalBooking, setRejectModalBooking] = useState<BookingItem | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+
+  // WhatsApp notification popup modal after Accept/Reject
+  const [whatsappNotifyModal, setWhatsappNotifyModal] = useState<{
+    type: 'ACCEPT' | 'REJECT';
+    booking: BookingItem;
+    whatsappUrl: string;
+  } | null>(null);
 
   const fetchBookings = (page = 1) => {
     setLoading(true);
@@ -79,8 +79,27 @@ export default function AdminBookingsPage() {
       });
       const data = await res.json();
       if (data.success) {
+        const targetBooking = acceptModalBooking;
         setAcceptModalBooking(null);
         fetchBookings(pagination.page);
+
+        // Generate Accept WhatsApp URL
+        const waUrl = buildAcceptWhatsAppUrl({
+          fullName: targetBooking.fullName,
+          phone: targetBooking.phone,
+          serviceName: targetBooking.serviceName,
+          referenceId: targetBooking.referenceId,
+          requestedDate: targetBooking.requestedDate,
+          address: targetBooking.address,
+        });
+
+        // Trigger notification modal & open WhatsApp
+        setWhatsappNotifyModal({
+          type: 'ACCEPT',
+          booking: targetBooking,
+          whatsappUrl: waUrl,
+        });
+        window.open(waUrl, '_blank');
       } else {
         alert(data.error || 'Failed to accept booking');
       }
@@ -112,9 +131,27 @@ export default function AdminBookingsPage() {
       });
       const data = await res.json();
       if (data.success) {
+        const targetBooking = rejectModalBooking;
         setRejectModalBooking(null);
         setRejectionReason('');
         fetchBookings(pagination.page);
+
+        // Generate Reject WhatsApp URL
+        const waUrl = buildRejectWhatsAppUrl({
+          fullName: targetBooking.fullName,
+          phone: targetBooking.phone,
+          serviceName: targetBooking.serviceName,
+          referenceId: targetBooking.referenceId,
+          requestedDate: targetBooking.requestedDate,
+        });
+
+        // Trigger notification modal & open WhatsApp
+        setWhatsappNotifyModal({
+          type: 'REJECT',
+          booking: targetBooking,
+          whatsappUrl: waUrl,
+        });
+        window.open(waUrl, '_blank');
       } else {
         alert(data.error || 'Failed to reject booking');
       }
@@ -388,7 +425,7 @@ export default function AdminBookingsPage() {
                 disabled={actionLoading}
                 className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-heading font-bold"
               >
-                {actionLoading ? 'ACCEPTING...' : 'CONFIRM ACCEPT'}
+                {actionLoading ? 'ACCEPTING...' : 'CONFIRM & SEND WHATSAPP'}
               </button>
             </div>
           </div>
@@ -419,7 +456,7 @@ export default function AdminBookingsPage() {
               <textarea
                 required
                 rows={3}
-                placeholder="Specify rejection reason (e.g. Schedule fully booked for selected date)..."
+                placeholder="Specify rejection reason..."
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 className="w-full p-3 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-red-500 focus:outline-none placeholder:text-gray-600"
@@ -440,10 +477,78 @@ export default function AdminBookingsPage() {
                 disabled={actionLoading}
                 className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-heading font-bold"
               >
-                {actionLoading ? 'REJECTING...' : 'REJECT REQUEST'}
+                {actionLoading ? 'REJECTING...' : 'REJECT & SEND WHATSAPP'}
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* WhatsApp Action Notification Modal */}
+      {whatsappNotifyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-brand-surface border border-emerald-500/60 rounded-2xl p-6 space-y-4 text-center shadow-neon-xl relative">
+            <button
+              onClick={() => setWhatsappNotifyModal(null)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/40">
+              <MessageSquare className="w-7 h-7" />
+            </div>
+
+            <h3 className="font-heading font-extrabold text-xl text-white">
+              {whatsappNotifyModal.type === 'ACCEPT' ? 'BOOKING ACCEPTED!' : 'BOOKING REJECTED'}
+            </h3>
+
+            <p className="text-xs text-gray-300">
+              Status updated for <strong className="text-brand-green">{whatsappNotifyModal.booking.fullName}</strong> ({whatsappNotifyModal.booking.referenceId}). Click below to open WhatsApp and send the official notification message.
+            </p>
+
+            <div className="p-4 rounded-xl bg-black/90 border border-brand-border text-left space-y-2">
+              <span className="text-[10px] font-mono uppercase text-brand-green block font-bold">
+                WhatsApp Message Template:
+              </span>
+              <p className="text-xs text-gray-200 font-mono whitespace-pre-wrap leading-relaxed">
+                {whatsappNotifyModal.type === 'ACCEPT'
+                  ? `Hello ${whatsappNotifyModal.booking.fullName},
+Your booking request for ${whatsappNotifyModal.booking.serviceName} has been accepted successfully.
+Reference Number: ${whatsappNotifyModal.booking.referenceId}
+Date: ${whatsappNotifyModal.booking.requestedDate}
+Time: 10:00 AM
+Location: ${whatsappNotifyModal.booking.address || 'AL DHAIT SOUTH, RAS AL KHAIMAH, UAE'}
+
+Thank you for choosing WALESS GROUP. We look forward to serving you!`
+                  : `Hello ${whatsappNotifyModal.booking.fullName},
+We regret to inform you that your booking request for ${whatsappNotifyModal.booking.serviceName} and ${whatsappNotifyModal.booking.referenceId} on ${whatsappNotifyModal.booking.requestedDate} at 10:00 AM has been rejected.
+
+Please contact us or submit another booking request for an alternative date and time.
+
+Thank you for understanding.
+WALESS GROUP`}
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center gap-3">
+              <button
+                onClick={() => setWhatsappNotifyModal(null)}
+                className="flex-1 py-3 rounded-xl bg-black border border-brand-border text-white text-xs font-heading"
+              >
+                Close
+              </button>
+              <a
+                href={whatsappNotifyModal.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-heading font-bold text-xs uppercase tracking-wider shadow-neon-sm"
+              >
+                <span>OPEN WHATSAPP</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </div>
