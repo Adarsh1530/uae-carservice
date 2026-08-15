@@ -11,6 +11,9 @@ import {
   X,
   MessageSquare,
   ExternalLink,
+  Settings,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { formatDate, buildAcceptWhatsAppUrl, buildRejectWhatsAppUrl } from '@/lib/utils';
 import { BookingItem } from '@/lib/types';
@@ -24,12 +27,12 @@ export default function AdminBookingsPage() {
 
   // Modals state
   const [selectedBookingDetails, setSelectedBookingDetails] = useState<BookingItem | null>(null);
-  const [acceptModalBooking, setAcceptModalBooking] = useState<BookingItem | null>(null);
-  const [rejectModalBooking, setRejectModalBooking] = useState<BookingItem | null>(null);
+  const [manageBooking, setManageBooking] = useState<BookingItem | null>(null);
+  const [deleteTargetBooking, setDeleteTargetBooking] = useState<BookingItem | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
-  // WhatsApp notification popup modal after Accept/Reject
+  // WhatsApp notification popup modal
   const [whatsappNotifyModal, setWhatsappNotifyModal] = useState<{
     type: 'ACCEPT' | 'REJECT';
     booking: BookingItem;
@@ -65,25 +68,22 @@ export default function AdminBookingsPage() {
     fetchBookings(1);
   };
 
-  const handleAcceptConfirm = async () => {
-    if (!acceptModalBooking) return;
+  const handleAcceptStatus = async (targetBooking: BookingItem) => {
     setActionLoading(true);
     try {
       const res = await fetch('/api/bookings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: acceptModalBooking.id,
+          id: targetBooking.id,
           action: 'ACCEPT',
         }),
       });
       const data = await res.json();
       if (data.success) {
-        const targetBooking = acceptModalBooking;
-        setAcceptModalBooking(null);
+        setManageBooking(null);
         fetchBookings(pagination.page);
 
-        // Generate Accept WhatsApp URL
         const waUrl = buildAcceptWhatsAppUrl({
           fullName: targetBooking.fullName,
           phone: targetBooking.phone,
@@ -93,7 +93,6 @@ export default function AdminBookingsPage() {
           address: targetBooking.address,
         });
 
-        // Trigger notification modal
         setWhatsappNotifyModal({
           type: 'ACCEPT',
           booking: targetBooking,
@@ -109,10 +108,8 @@ export default function AdminBookingsPage() {
     }
   };
 
-  const handleRejectConfirm = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!rejectModalBooking) return;
-    if (!rejectionReason.trim()) {
+  const handleRejectStatus = async (targetBooking: BookingItem, reason: string) => {
+    if (!reason.trim()) {
       alert('Please state a reason for rejection');
       return;
     }
@@ -123,19 +120,17 @@ export default function AdminBookingsPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: rejectModalBooking.id,
+          id: targetBooking.id,
           action: 'REJECT',
-          rejectionReason,
+          rejectionReason: reason.trim(),
         }),
       });
       const data = await res.json();
       if (data.success) {
-        const targetBooking = rejectModalBooking;
-        setRejectModalBooking(null);
+        setManageBooking(null);
         setRejectionReason('');
         fetchBookings(pagination.page);
 
-        // Generate Reject WhatsApp URL
         const waUrl = buildRejectWhatsAppUrl({
           fullName: targetBooking.fullName,
           phone: targetBooking.phone,
@@ -144,7 +139,6 @@ export default function AdminBookingsPage() {
           requestedDate: targetBooking.requestedDate,
         });
 
-        // Trigger notification modal
         setWhatsappNotifyModal({
           type: 'REJECT',
           booking: targetBooking,
@@ -155,6 +149,52 @@ export default function AdminBookingsPage() {
       }
     } catch (e) {
       console.error('Reject booking error:', e);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSetPendingStatus = async (targetBooking: BookingItem) => {
+    setActionLoading(true);
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: targetBooking.id,
+          action: 'PENDING',
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setManageBooking(null);
+        fetchBookings(pagination.page);
+      } else {
+        alert(data.error || 'Failed to update booking');
+      }
+    } catch (e) {
+      console.error('Update status error:', e);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetBooking) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/bookings?id=${deleteTargetBooking.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDeleteTargetBooking(null);
+        fetchBookings(pagination.page);
+      } else {
+        alert(data.error || 'Failed to delete booking');
+      }
+    } catch (e) {
+      console.error('Delete booking error:', e);
     } finally {
       setActionLoading(false);
     }
@@ -244,9 +284,7 @@ export default function AdminBookingsPage() {
                   const waUrl =
                     b.status === 'ACCEPTED'
                       ? buildAcceptWhatsAppUrl(b)
-                      : b.status === 'REJECTED'
-                      ? buildRejectWhatsAppUrl(b)
-                      : null;
+                      : buildRejectWhatsAppUrl(b);
 
                   return (
                     <tr key={b.id} className="hover:bg-white/5 transition-colors">
@@ -270,6 +308,7 @@ export default function AdminBookingsPage() {
                         </span>
                       </td>
                       <td className="p-4 text-right space-x-2">
+                        {/* 1. View Details Icon */}
                         <button
                           onClick={() => setSelectedBookingDetails(b)}
                           className="p-1.5 rounded-lg bg-black border border-brand-border text-gray-300 hover:text-white hover:border-brand-green transition-colors"
@@ -278,39 +317,37 @@ export default function AdminBookingsPage() {
                           <Eye className="w-4 h-4 text-brand-green" />
                         </button>
 
-                        {waUrl && (
-                          <a
-                            href={waUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/60 text-emerald-400 hover:bg-emerald-800/80 transition-colors"
-                            title="Send WhatsApp Notification"
-                          >
-                            <MessageSquare className="w-4 h-4" />
-                          </a>
-                        )}
+                        {/* 2. WhatsApp Notification Icon */}
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/60 text-emerald-400 hover:bg-emerald-800/80 transition-colors"
+                          title="Send WhatsApp Notification to Customer"
+                        >
+                          <MessageSquare className="w-4 h-4 text-emerald-400" />
+                        </a>
 
-                        {b.status === 'PENDING' && (
-                          <>
-                            <button
-                              onClick={() => setAcceptModalBooking(b)}
-                              className="p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-800/80 transition-colors"
-                              title="Accept Request"
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setRejectModalBooking(b);
-                                setRejectionReason('');
-                              }}
-                              className="p-1.5 rounded-lg bg-red-950/80 border border-red-500/50 text-red-400 hover:bg-red-800/80 transition-colors"
-                              title="Reject Request"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
+                        {/* 3. Manage Status Icon */}
+                        <button
+                          onClick={() => {
+                            setManageBooking(b);
+                            setRejectionReason(b.rejectionReason || '');
+                          }}
+                          className="p-1.5 rounded-lg bg-black border border-brand-border text-gray-300 hover:text-brand-green transition-colors"
+                          title="Manage Status (Accept / Reject / Pending)"
+                        >
+                          <Settings className="w-4 h-4 text-amber-400" />
+                        </button>
+
+                        {/* 4. Delete Booking Icon */}
+                        <button
+                          onClick={() => setDeleteTargetBooking(b)}
+                          className="p-1.5 rounded-lg bg-red-950/60 border border-red-500/40 text-red-400 hover:bg-red-900/60 transition-colors"
+                          title="Delete Booking Request"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </button>
                       </td>
                     </tr>
                   );
@@ -420,86 +457,116 @@ export default function AdminBookingsPage() {
         </div>
       )}
 
-      {/* Accept Confirmation Modal */}
-      {acceptModalBooking && (
+      {/* MANAGE BOOKING MODAL (Accept / Reject / Reset Status) */}
+      {manageBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="w-full max-w-md bg-brand-surface border border-emerald-500/50 rounded-2xl p-6 text-center space-y-4 shadow-neon-lg">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
-              <CheckCircle className="w-8 h-8" />
+          <div className="w-full max-w-lg bg-brand-surface border border-brand-green/40 rounded-2xl p-6 sm:p-8 space-y-5 relative shadow-neon-xl">
+            <button
+              onClick={() => setManageBooking(null)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="border-b border-brand-border pb-3">
+              <span className="text-xs font-mono text-brand-green uppercase">MANAGE BOOKING STATUS</span>
+              <h2 className="font-heading font-extrabold text-xl text-white">
+                {manageBooking.referenceId} — {manageBooking.fullName}
+              </h2>
+              <p className="text-xs text-gray-400 mt-1 font-mono">
+                Current Status: <strong className="text-brand-green">{manageBooking.status}</strong>
+              </p>
             </div>
-            <h3 className="font-heading font-extrabold text-xl text-white">Accept Booking Request?</h3>
-            <p className="text-xs text-gray-300">
-              Confirm booking <strong className="text-brand-green">{acceptModalBooking.referenceId}</strong> for {acceptModalBooking.fullName}?
-            </p>
-            <div className="flex items-center gap-3 pt-2">
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={() => handleAcceptStatus(manageBooking)}
+                  className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-neon-sm"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>ACCEPT BOOKING</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={() => handleSetPendingStatus(manageBooking)}
+                  className="py-3 px-4 rounded-xl bg-amber-600/80 hover:bg-amber-500 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                >
+                  <span>RESET TO PENDING</span>
+                </button>
+              </div>
+
+              <div className="border-t border-brand-border/60 pt-4 space-y-2">
+                <label className="block text-xs font-mono uppercase text-red-300">
+                  Rejection Reason (if rejecting request)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Reason for rejection..."
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-red-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={() => handleRejectStatus(manageBooking, rejectionReason)}
+                  className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  <span>REJECT BOOKING</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
               <button
-                onClick={() => setAcceptModalBooking(null)}
-                disabled={actionLoading}
-                className="flex-1 py-3 rounded-xl bg-black border border-brand-border text-white text-xs font-heading"
+                type="button"
+                onClick={() => setManageBooking(null)}
+                className="px-5 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs font-heading"
               >
                 Cancel
-              </button>
-              <button
-                onClick={handleAcceptConfirm}
-                disabled={actionLoading}
-                className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-heading font-bold"
-              >
-                {actionLoading ? 'ACCEPTING...' : 'CONFIRM ACCEPT'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Reject Modal */}
-      {rejectModalBooking && (
+      {/* DELETE BOOKING CONFIRMATION MODAL */}
+      {deleteTargetBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <form
-            onSubmit={handleRejectConfirm}
-            className="w-full max-w-md bg-brand-surface border border-red-500/50 rounded-2xl p-6 space-y-4 shadow-neon-lg"
-          >
-            <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mx-auto">
-              <XCircle className="w-8 h-8" />
-            </div>
-            <div className="text-center">
-              <h3 className="font-heading font-extrabold text-xl text-white">Reject Booking Request</h3>
-              <p className="text-xs text-gray-300 mt-1">
-                Refusing request <strong className="text-red-400">{rejectModalBooking.referenceId}</strong>
-              </p>
+          <div className="w-full max-w-md bg-brand-surface border border-red-500/50 rounded-2xl p-6 text-center space-y-4 shadow-neon-lg">
+            <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mx-auto border border-red-500/40">
+              <AlertTriangle className="w-7 h-7 text-red-500" />
             </div>
 
-            <div>
-              <label className="block text-xs font-mono uppercase text-red-300 mb-1.5">
-                Reason for Rejection <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                required
-                rows={3}
-                placeholder="Specify rejection reason..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                className="w-full p-3 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-red-500 focus:outline-none placeholder:text-gray-600"
-              />
-            </div>
+            <h3 className="font-heading font-extrabold text-xl text-white">DELETE BOOKING?</h3>
+
+            <p className="text-xs text-gray-300">
+              Are you sure you want to permanently delete booking <strong className="text-red-400">{deleteTargetBooking.referenceId}</strong> ({deleteTargetBooking.fullName})? This action cannot be undone.
+            </p>
 
             <div className="flex items-center gap-3 pt-2">
               <button
-                type="button"
-                onClick={() => setRejectModalBooking(null)}
+                onClick={() => setDeleteTargetBooking(null)}
                 disabled={actionLoading}
-                className="flex-1 py-3 rounded-xl bg-black border border-brand-border text-white text-xs font-heading"
+                className="flex-1 py-3 rounded-xl bg-black border border-brand-border text-white text-xs font-heading hover:bg-white/10"
               >
-                Cancel
+                CANCEL
               </button>
               <button
-                type="submit"
+                onClick={handleDeleteConfirm}
                 disabled={actionLoading}
-                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-heading font-bold"
+                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-heading font-bold shadow-neon-sm"
               >
-                {actionLoading ? 'REJECTING...' : 'REJECT REQUEST'}
+                {actionLoading ? 'DELETING...' : 'DELETE BOOKING'}
               </button>
             </div>
-          </form>
+          </div>
         </div>
       )}
 

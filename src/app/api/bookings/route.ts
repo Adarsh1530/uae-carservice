@@ -167,7 +167,7 @@ export async function PUT(req: Request) {
         rejectionReason: rejectionReason.trim(),
       };
     } else if (['CANCELLED', 'COMPLETED', 'PENDING'].includes(action)) {
-      updateData = { status: action };
+      updateData = { status: action, rejectionReason: null };
     } else {
       return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
     }
@@ -193,5 +193,39 @@ export async function PUT(req: Request) {
   } catch (error) {
     console.error('Error updating booking status:', error);
     return NextResponse.json({ success: false, error: 'Failed to update booking status' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await getAdminSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Booking ID is required' }, { status: 400 });
+    }
+
+    await db.booking.delete({ where: { id } });
+
+    try {
+      await db.auditLog.create({
+        data: {
+          adminUsername: session.username,
+          action: 'DELETE_BOOKING',
+          entityType: 'Booking',
+          entityId: id,
+        },
+      });
+    } catch (auditErr) {}
+
+    return NextResponse.json({ success: true, message: 'Booking deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting booking:', error);
+    return NextResponse.json({ success: false, error: error?.message || 'Failed to delete booking' }, { status: 500 });
   }
 }
