@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { User, Lock, Key, ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function AdminProfilePage() {
@@ -66,8 +67,8 @@ export default function AdminProfilePage() {
       </div>
 
       <div className="p-6 rounded-2xl bg-brand-surface border border-brand-border flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-brand-green/20 border border-brand-green flex items-center justify-center font-heading font-black text-brand-green text-2xl shadow-neon-sm">
-          W
+        <div className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-neon-sm border border-brand-green/40">
+          <Image src="/icon.svg" alt="WALESS GROUP Logo" fill className="object-contain p-1" priority />
         </div>
         <div>
           <h2 className="font-heading font-bold text-white text-lg">WALESSGROUP</h2>
