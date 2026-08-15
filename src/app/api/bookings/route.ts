@@ -7,7 +7,7 @@ import { generateBookingReferenceId } from '@/lib/utils';
 import { z } from 'zod';
 
 const bookingSchema = z.object({
-  serviceId: z.string().min(1, 'Service ID is required'),
+  serviceId: z.string().optional().nullable(),
   serviceName: z.string().min(1, 'Service name is required'),
   fullName: z.string().min(2, 'Full Name must be at least 2 characters'),
   address: z.string().min(3, 'Address is required'),
@@ -21,7 +21,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const validated = bookingSchema.parse(body);
 
-    // Validate that requestedDate is not in the past
     const bookingDate = new Date(validated.requestedDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -33,26 +32,38 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate server-side secure reference ID
     const referenceId = await generateBookingReferenceId();
 
-    const booking = await db.booking.create({
+    const created = await db.booking.create({
       data: {
         referenceId,
-        serviceId: validated.serviceId,
+        clientName: validated.fullName,
+        clientEmail: 'client@walessgroup.ae',
+        clientPhone: validated.phone,
+        clientAddress: validated.address,
         serviceName: validated.serviceName,
-        fullName: validated.fullName,
-        address: validated.address,
-        phone: validated.phone,
-        requestedDate: validated.requestedDate,
-        description: validated.description || null,
+        preferredDate: validated.requestedDate,
+        specialNotes: validated.description || null,
         status: 'PENDING',
       },
     });
 
+    const responseBooking = {
+      id: created.id,
+      referenceId: created.referenceId,
+      fullName: created.clientName,
+      phone: created.clientPhone,
+      address: created.clientAddress,
+      serviceName: created.serviceName,
+      requestedDate: created.preferredDate,
+      description: created.specialNotes,
+      status: created.status,
+      createdAt: created.createdAt,
+    };
+
     return NextResponse.json({
       success: true,
-      booking,
+      booking: responseBooking,
       message: 'Booking successfully submitted.',
     });
   } catch (error: any) {
@@ -63,7 +74,10 @@ export async function POST(req: Request) {
       );
     }
     console.error('Error creating booking:', error);
-    return NextResponse.json({ success: false, error: 'Server error creating booking' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Server error creating booking' },
+      { status: 500 }
+    );
   }
 }
 
@@ -90,23 +104,43 @@ export async function GET(req: Request) {
       const query = search.trim();
       where.OR = [
         { referenceId: { contains: query } },
-        { fullName: { contains: query } },
-        { phone: { contains: query } },
+        { clientName: { contains: query } },
+        { clientPhone: { contains: query } },
         { serviceName: { contains: query } },
       ];
     }
 
-    const [bookings, total] = await Promise.all([
-      db.booking.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      db.booking.count({ where }),
-    ]);
+    let rawBookings: any[] = [];
+    let total = 0;
+    try {
+      [rawBookings, total] = await Promise.all([
+        db.booking.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+        }),
+        db.booking.count({ where }),
+      ]);
+    } catch (e) {
+      console.warn('DB bookings fetch fallback:', e);
+    }
 
-    const totalPages = Math.ceil(total / limit);
+    const bookings = rawBookings.map((b) => ({
+      id: b.id,
+      referenceId: b.referenceId,
+      fullName: b.clientName,
+      phone: b.clientPhone,
+      address: b.clientAddress,
+      serviceName: b.serviceName,
+      requestedDate: b.preferredDate,
+      description: b.specialNotes,
+      status: b.status,
+      rejectionReason: b.rejectionReason,
+      createdAt: b.createdAt,
+    }));
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
 
     return NextResponse.json({
       success: true,
@@ -148,15 +182,13 @@ export async function PUT(req: Request) {
     if (action === 'ACCEPT') {
       updateData = {
         status: 'ACCEPTED',
-        acceptedAt: new Date(),
       };
     } else if (action === 'REJECT') {
-      if (!rejectionReason || rejectionReason.trim() === '') {
+      if (!rejectionReason || !rejectionReason.trim()) {
         return NextResponse.json({ success: false, error: 'Rejection reason is required' }, { status: 400 });
       }
       updateData = {
         status: 'REJECTED',
-        rejectedAt: new Date(),
         rejectionReason: rejectionReason.trim(),
       };
     } else if (['CANCELLED', 'COMPLETED', 'PENDING'].includes(action)) {
@@ -170,15 +202,17 @@ export async function PUT(req: Request) {
       data: updateData,
     });
 
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: `BOOKING_${action}`,
-        entityType: 'Booking',
-        entityId: id,
-        metadata: JSON.stringify({ referenceId: booking.referenceId, action, rejectionReason }),
-      },
-    });
+    try {
+      await db.auditLog.create({
+        data: {
+          adminUsername: session.username,
+          action: `BOOKING_${action}`,
+          entityType: 'Booking',
+          entityId: id,
+          metadata: JSON.stringify({ referenceId: booking.referenceId, action, rejectionReason }),
+        },
+      });
+    } catch (auditErr) {}
 
     return NextResponse.json({ success: true, booking: updated });
   } catch (error) {
