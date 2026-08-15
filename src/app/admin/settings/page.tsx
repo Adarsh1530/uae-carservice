@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Settings, Save, Loader2, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
+import { Settings, Save, Loader2, CheckCircle2, Upload } from 'lucide-react';
 import { SiteSettings } from '@/lib/types';
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -28,9 +29,10 @@ const DEFAULT_SETTINGS: SiteSettings = {
 };
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<any>({ ...DEFAULT_SETTINGS, logoUrl: '/icon.svg' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
@@ -38,12 +40,38 @@ export default function AdminSettingsPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.settings) {
-          setSettings(data.settings);
+          setSettings({ ...DEFAULT_SETTINGS, logoUrl: '/icon.svg', ...data.settings });
         }
       })
       .catch((e) => console.warn('Fetch site settings error:', e))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    const data = new FormData();
+    data.append('file', file);
+    data.append('category', 'Logos');
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: data,
+      });
+      const resData = await res.json();
+      if (resData.success && resData.url) {
+        setSettings((prev: any) => ({ ...prev, logoUrl: resData.url }));
+      } else {
+        alert(resData.error || 'Upload failed');
+      }
+    } catch (err) {
+      console.error('Logo upload error:', err);
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +87,8 @@ export default function AdminSettingsPage() {
 
       const data = await res.json();
       if (data.success) {
-        setSuccessMsg('Site settings updated successfully!');
-        if (data.settings) setSettings(data.settings);
+        setSuccessMsg('Site settings and logo updated successfully!');
+        if (data.settings) setSettings((prev: any) => ({ ...prev, ...data.settings }));
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
         alert(data.error || 'Failed to update settings');
@@ -106,19 +134,56 @@ export default function AdminSettingsPage() {
       )}
 
       <form onSubmit={handleSave} className="space-y-6">
-        {/* Company Identity */}
+        {/* Company Identity & Logo */}
         <div className="p-6 rounded-2xl bg-brand-surface border border-brand-border space-y-4">
           <h3 className="font-heading font-bold text-lg text-white border-l-2 border-brand-green pl-3">
-            Company Identity & Branding
+            Company Identity & Brand Logo
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          {/* Logo Upload Section */}
+          <div className="p-4 rounded-xl bg-black/80 border border-brand-border flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16 rounded-2xl border border-brand-green/50 bg-black overflow-hidden shadow-neon-sm flex items-center justify-center">
+                {settings.logoUrl ? (
+                  <Image src={settings.logoUrl} alt="WALESS GROUP Logo" fill className="object-contain p-1" />
+                ) : (
+                  <span className="text-xs font-mono text-gray-500">No Logo</span>
+                )}
+              </div>
+              <div>
+                <span className="text-xs font-mono text-brand-green uppercase font-bold block">
+                  Official Website Logo
+                </span>
+                <p className="text-[11px] text-gray-400 mt-0.5">
+                  Uploaded logo displays across site navigation, footer, & admin portal.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <input
+                type="text"
+                value={settings.logoUrl || ''}
+                onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
+                placeholder="/icon.svg"
+                className="flex-1 sm:w-64 px-3 py-2 rounded-xl bg-black border border-brand-border text-white text-xs font-mono focus:border-brand-green"
+              />
+              <label className="cursor-pointer px-4 py-2 rounded-xl bg-brand-surface border border-brand-green text-brand-green text-xs font-heading font-bold hover:bg-brand-green hover:text-black transition-all flex items-center gap-1.5 shrink-0">
+                {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                <span>UPLOAD</span>
+                <input type="file" accept="image/*,.svg" className="hidden" onChange={handleLogoUpload} />
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             <div>
               <label className="block text-xs font-mono text-gray-300 mb-1">Company Name</label>
               <input
                 type="text"
-                readOnly
                 value={settings.companyName}
-                className="w-full px-4 py-2.5 rounded-xl bg-black/80 border border-brand-border text-brand-green font-bold text-xs cursor-not-allowed"
+                onChange={(e) => setSettings({ ...settings, companyName: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs font-bold focus:border-brand-green"
               />
             </div>
             <div>

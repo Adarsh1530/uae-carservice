@@ -23,6 +23,7 @@ model SiteSettings {
   id              String   @id @default("default")
   companyName     String   @default("WALESS GROUP")
   domain          String   @default("walessgroup.ae")
+  logoUrl         String   @default("/icon.svg")
   phone           String   @default("+971 7 222 868")
   mobile1         String   @default("+971 54 307 2733")
   mobile2         String   @default("+971 54 307 2711")
