@@ -16,15 +16,20 @@ export const metadata: Metadata = {
   title: 'WALESS GROUP | Bespoke Automotive Customization & Corporate Solutions UAE',
   description:
     'WALESS GROUP represents the pinnacle of luxury vehicle customization, precision tuning, ceramic protection, and executive solutions in Ras Al Khaimah and across the UAE.',
-  metadataBase: new URL('https://www.walessgroup.ae'),
+  metadataBase: new URL('https://walessgroup.ae'),
   alternates: {
-    canonical: 'https://www.walessgroup.ae',
+    canonical: 'https://walessgroup.ae',
+  },
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
   },
   openGraph: {
     title: 'WALESS GROUP | Luxury Automotive & Corporate Solutions UAE',
     description:
       'Ultra-luxury bespoke vehicle customization, high-performance tuning, ceramic protection, and executive services in Ras Al Khaimah, UAE.',
-    url: 'https://www.walessgroup.ae',
+    url: 'https://walessgroup.ae',
     siteName: 'WALESS GROUP',
     images: [
       {
@@ -52,7 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} dark`}>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
       </head>
       <body className="bg-black text-white font-sans antialiased selection:bg-brand-green selection:text-black min-h-screen flex flex-col">
         {children}

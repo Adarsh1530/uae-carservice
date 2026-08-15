@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Phone, MapPin, Instagram, Calendar, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
+import { Phone, MapPin, Instagram, Calendar, ArrowUpRight } from 'lucide-react';
 
 interface FooterProps {
   onOpenBooking?: () => void;
@@ -11,7 +12,6 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
   return (
     <footer className="relative bg-black border-t border-brand-border/60 overflow-hidden text-gray-400">
-      {/* Soft background neon glow ambient circles */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-green/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-900/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -20,8 +20,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-green to-emerald-700 flex items-center justify-center shadow-neon-sm">
-                <span className="font-heading font-black text-black text-xl">W</span>
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-neon-sm">
+                <Image src="/icon.svg" alt="WALESS GROUP Logo" fill className="object-contain p-0.5" />
               </div>
               <span className="font-heading font-extrabold text-2xl tracking-widest text-white">
                 WALESS<span className="text-brand-green ml-1.5">GROUP</span>

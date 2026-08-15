@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Lock, User, ShieldCheck, Loader2, Sparkles, ArrowRight } from 'lucide-react';
+import { Lock, User, Loader2, ArrowRight } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -45,8 +46,8 @@ export default function AdminLoginPage() {
 
       <div className="w-full max-w-md bg-brand-surface border border-brand-green/40 rounded-2xl shadow-neon-xl p-8 relative z-10 space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-xl bg-brand-green/20 border border-brand-green flex items-center justify-center mx-auto mb-3 shadow-neon-md">
-            <ShieldCheck className="w-6 h-6 text-brand-green" />
+          <div className="relative w-14 h-14 rounded-2xl overflow-hidden mx-auto mb-3 shadow-neon-md">
+            <Image src="/icon.svg" alt="WALESS GROUP Logo" fill className="object-contain p-1" priority />
           </div>
           <span className="text-[10px] font-mono text-brand-green uppercase tracking-widest block font-semibold">
             WALESS GROUP CMS

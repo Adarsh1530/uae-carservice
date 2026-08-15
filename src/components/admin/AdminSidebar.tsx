@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -46,8 +47,8 @@ export const AdminSidebar = () => {
       {/* Mobile Bar */}
       <div className="lg:hidden flex items-center justify-between p-4 bg-brand-surface border-b border-brand-border sticky top-0 z-40">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-brand-green flex items-center justify-center font-bold text-black text-sm">
-            W
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+            <Image src="/icon.svg" alt="WALESS GROUP Logo" fill className="object-contain p-0.5" />
           </div>
           <span className="font-heading font-black text-sm tracking-wider text-white">
             WALESS <span className="text-brand-green">ADMIN</span>
@@ -72,8 +73,8 @@ export const AdminSidebar = () => {
           {/* Logo Brand Header */}
           <div className="p-6 border-b border-brand-border flex items-center justify-between">
             <Link href="/admin/dashboard" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-green to-emerald-700 flex items-center justify-center font-heading font-black text-black text-lg shadow-neon-sm">
-                W
+              <div className="relative w-9 h-9 rounded-xl overflow-hidden shadow-neon-sm">
+                <Image src="/icon.svg" alt="WALESS GROUP Logo" fill className="object-contain p-0.5" />
               </div>
               <div>
                 <span className="font-heading font-extrabold text-white text-base tracking-wider block">

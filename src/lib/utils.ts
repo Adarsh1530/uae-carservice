@@ -107,3 +107,5 @@ Please confirm my appointment. Thank you!`;
 
   return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
 }
+
+export const buildWhatsAppLink = buildWhatsAppUrl;

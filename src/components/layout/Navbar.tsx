@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Calendar, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Menu, X, Calendar, ChevronRight } from 'lucide-react';
 
 interface NavbarProps {
   onOpenBooking?: () => void;
@@ -53,8 +54,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-green to-emerald-700 flex items-center justify-center shadow-neon-sm group-hover:shadow-neon-md transition-all duration-300">
-              <span className="font-heading font-black text-black text-xl tracking-tighter">W</span>
+            <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-neon-sm group-hover:scale-105 transition-all duration-300">
+              <Image
+                src="/icon.svg"
+                alt="WALESS GROUP Logo"
+                fill
+                className="object-contain p-0.5"
+                priority
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-heading font-extrabold text-xl tracking-widest text-white group-hover:text-brand-green transition-colors duration-300">
