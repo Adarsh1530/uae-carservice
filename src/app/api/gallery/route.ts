@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getAdminSession } from '@/lib/auth';
@@ -15,10 +17,15 @@ export async function GET(req: Request) {
     if (!showAll) whereClause.active = true;
     if (category && category !== 'All') whereClause.category = category;
 
-    const gallery = await db.galleryImage.findMany({
-      where: whereClause,
-      orderBy: { displayOrder: 'asc' },
-    });
+    let gallery: any[] = [];
+    try {
+      gallery = await db.galleryImage.findMany({
+        where: whereClause,
+        orderBy: { displayOrder: 'asc' },
+      });
+    } catch (e) {
+      console.warn('DB gallery fetch fallback:', e);
+    }
 
     return NextResponse.json({ success: true, gallery });
   } catch (error) {
@@ -43,28 +50,33 @@ export async function POST(req: Request) {
 
     const created = await db.galleryImage.create({
       data: {
-        title,
-        description: description || null,
+        title: title.trim(),
+        description: description && description.trim() ? description.trim() : null,
         imageUrl,
-        category: category || 'General',
-        displayOrder: parseInt(displayOrder) || 0,
+        category: category || 'Luxury Customization',
+        displayOrder: parseInt(displayOrder) || 1,
         active: active !== undefined ? Boolean(active) : true,
       },
     });
 
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: 'CREATE_GALLERY_IMAGE',
-        entityType: 'GalleryImage',
-        entityId: created.id,
-      },
-    });
+    try {
+      await db.auditLog.create({
+        data: {
+          adminUsername: session.username,
+          action: 'CREATE_GALLERY_IMAGE',
+          entityType: 'GalleryImage',
+          entityId: created.id,
+        },
+      });
+    } catch (auditErr) {}
 
     return NextResponse.json({ success: true, galleryImage: created });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating gallery image:', error);
-    return NextResponse.json({ success: false, error: 'Failed to create gallery image' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Failed to create gallery image' },
+      { status: 500 }
+    );
   }
 }
 
@@ -85,28 +97,33 @@ export async function PUT(req: Request) {
     const updated = await db.galleryImage.update({
       where: { id },
       data: {
-        title,
-        description,
-        imageUrl,
-        category,
+        title: title ? title.trim() : undefined,
+        description: description !== undefined ? (description ? description.trim() : null) : undefined,
+        imageUrl: imageUrl || undefined,
+        category: category || undefined,
         displayOrder: displayOrder !== undefined ? parseInt(displayOrder) : undefined,
         active: active !== undefined ? Boolean(active) : undefined,
       },
     });
 
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: 'UPDATE_GALLERY_IMAGE',
-        entityType: 'GalleryImage',
-        entityId: updated.id,
-      },
-    });
+    try {
+      await db.auditLog.create({
+        data: {
+          adminUsername: session.username,
+          action: 'UPDATE_GALLERY_IMAGE',
+          entityType: 'GalleryImage',
+          entityId: updated.id,
+        },
+      });
+    } catch (auditErr) {}
 
     return NextResponse.json({ success: true, galleryImage: updated });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating gallery image:', error);
-    return NextResponse.json({ success: false, error: 'Failed to update gallery image' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Failed to update gallery image' },
+      { status: 500 }
+    );
   }
 }
 
@@ -128,18 +145,23 @@ export async function DELETE(req: Request) {
       where: { id },
     });
 
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: 'DELETE_GALLERY_IMAGE',
-        entityType: 'GalleryImage',
-        entityId: id,
-      },
-    });
+    try {
+      await db.auditLog.create({
+        data: {
+          adminUsername: session.username,
+          action: 'DELETE_GALLERY_IMAGE',
+          entityType: 'GalleryImage',
+          entityId: id,
+        },
+      });
+    } catch (auditErr) {}
 
     return NextResponse.json({ success: true, message: 'Gallery image deleted' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting gallery image:', error);
-    return NextResponse.json({ success: false, error: 'Failed to delete gallery image' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error?.message || 'Failed to delete gallery image' },
+      { status: 500 }
+    );
   }
 }

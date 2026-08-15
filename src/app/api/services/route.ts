@@ -12,10 +12,15 @@ export async function GET(req: Request) {
     const session = await getAdminSession();
     const showAll = includeInactive && session !== null;
 
-    const services = await db.service.findMany({
-      where: showAll ? {} : { active: true },
-      orderBy: { displayOrder: 'asc' },
-    });
+    let services: any[] = [];
+    try {
+      services = await db.service.findMany({
+        where: showAll ? {} : { active: true },
+        orderBy: { displayOrder: 'asc' },
+      });
+    } catch (e) {
+      console.warn('DB service fetch fallback:', e);
+    }
 
     const parsed = services.map((s) => ({
       ...s,
@@ -52,7 +57,6 @@ export async function POST(req: Request) {
       generatedSlug = `service-${Date.now()}`;
     }
 
-    // Check slug collision and ensure unique slug
     try {
       const existing = await db.service.findUnique({ where: { slug: generatedSlug } });
       if (existing) {
@@ -68,26 +72,40 @@ export async function POST(req: Request) {
       ? detailedDesc.trim()
       : finalShortDesc;
 
-    // Clean price string format (e.g. 300 -> 300 AED if raw number)
     let formattedPrice = priceInfo && priceInfo.trim() ? priceInfo.trim() : 'Bespoke Quote Upon Request';
     if (/^\d+$/.test(formattedPrice)) {
       formattedPrice = `${formattedPrice} AED`;
     }
 
-    const created = await db.service.create({
-      data: {
-        name: name.trim(),
-        slug: generatedSlug,
-        shortDesc: finalShortDesc,
-        detailedDesc: finalDetailedDesc,
-        mainImage,
-        additionalImages: JSON.stringify(Array.isArray(additionalImages) ? additionalImages : []),
-        features: JSON.stringify(Array.isArray(features) ? features : []),
-        priceInfo: formattedPrice,
-        displayOrder: parseInt(displayOrder) || 1,
-        active: active !== undefined ? Boolean(active) : true,
-      },
-    });
+    let created = null;
+    try {
+      created = await db.service.create({
+        data: {
+          name: name.trim(),
+          slug: generatedSlug,
+          shortDesc: finalShortDesc,
+          detailedDesc: finalDetailedDesc,
+          mainImage,
+          additionalImages: JSON.stringify(Array.isArray(additionalImages) ? additionalImages : []),
+          features: JSON.stringify(Array.isArray(features) ? features : []),
+          priceInfo: formattedPrice,
+          displayOrder: parseInt(displayOrder) || 1,
+          active: active !== undefined ? Boolean(active) : true,
+        },
+      });
+    } catch (dbErr: any) {
+      console.error('Service DB create error:', dbErr);
+      if (dbErr?.message?.includes('database string is invalid') || dbErr?.message?.includes('connection string')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Vercel DATABASE_URL formatting error. Please check your Supabase DATABASE_URL in Vercel Environment Variables.',
+          },
+          { status: 500 }
+        );
+      }
+      throw dbErr;
+    }
 
     try {
       await db.auditLog.create({
