@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Sparkles, Maximize2, Tag } from 'lucide-react';
+import { Maximize2, Tag } from 'lucide-react';
 
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -28,7 +28,7 @@ export default function GalleryPage() {
         if (data.success) setGallery(data.gallery);
       });
 
-    fetch('/api/site-settings')
+    fetch('/api/site-settings?_t=' + Date.now(), { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setSettings(data.settings);
@@ -50,7 +50,7 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col selection:bg-brand-green selection:text-black">
-      <Navbar onOpenBooking={() => setBookingModalOpen(true)} />
+      <Navbar settings={settings} onOpenBooking={() => setBookingModalOpen(true)} />
 
       <main className="flex-1">
         {/* Banner */}
@@ -136,7 +136,7 @@ export default function GalleryPage() {
         </section>
       </main>
 
-      <Footer onOpenBooking={() => setBookingModalOpen(true)} />
+      <Footer settings={settings} onOpenBooking={() => setBookingModalOpen(true)} />
 
       {/* Lightbox Modal */}
       <GalleryLightboxModal

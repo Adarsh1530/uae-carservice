@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Phone, MapPin, Instagram, Calendar, MessageCircle, Navigation, ExternalLink, Mail, Clock } from 'lucide-react';
+import { Phone, MapPin, Instagram, MessageCircle, Navigation } from 'lucide-react';
 
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -18,7 +18,7 @@ export default function ContactPage() {
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/api/site-settings')
+    fetch('/api/site-settings?_t=' + Date.now(), { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setSettings(data.settings);
@@ -31,6 +31,7 @@ export default function ContactPage() {
       });
   }, []);
 
+  const companyName = settings?.companyName || 'WALESS GROUP';
   const primaryPhone = settings?.phone || '+971 7 222 868';
   const mobile1 = settings?.mobile1 || '+971 54 307 2733';
   const mobile2 = settings?.mobile2 || '+971 54 307 2711';
@@ -46,7 +47,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col selection:bg-brand-green selection:text-black">
-      <Navbar onOpenBooking={() => setBookingModalOpen(true)} />
+      <Navbar settings={settings} onOpenBooking={() => setBookingModalOpen(true)} />
 
       <main className="flex-1">
         {/* Banner */}
@@ -57,7 +58,7 @@ export default function ContactPage() {
               DIRECT CONCIERGE
             </span>
             <h1 className="font-heading font-black text-4xl sm:text-6xl text-white tracking-tight">
-              GET IN TOUCH WITH <span className="text-brand-green">WALESS GROUP</span>
+              GET IN TOUCH WITH <span className="text-brand-green">{companyName}</span>
             </h1>
             <p className="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
               Visit our headquarters in Ras Al Khaimah, schedule a private consultation, or connect directly with our client executive team.
@@ -74,9 +75,10 @@ export default function ContactPage() {
                 <div className="relative h-64 w-full rounded-2xl overflow-hidden border border-brand-border shadow-neon-sm mb-6">
                   <Image
                     src={settings?.contactImageUrl || '/uploads/gallery__12_.jpg'}
-                    alt="WALESS GROUP Contact Hub"
+                    alt={`${companyName} Contact Hub`}
                     fill
                     className="object-cover"
+                    priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 </div>
@@ -106,18 +108,22 @@ export default function ContactPage() {
                         {primaryPhone}
                       </a>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-black/60 border border-brand-border/60">
-                      <span className="text-xs text-brand-muted font-mono">MOBILE LINE 1:</span>
-                      <a href={`tel:${mobile1.replace(/\s+/g, '')}`} className="font-semibold text-white hover:text-brand-green">
-                        {mobile1}
-                      </a>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-black/60 border border-brand-border/60">
-                      <span className="text-xs text-brand-muted font-mono">MOBILE LINE 2:</span>
-                      <a href={`tel:${mobile2.replace(/\s+/g, '')}`} className="font-semibold text-white hover:text-brand-green">
-                        {mobile2}
-                      </a>
-                    </div>
+                    {mobile1 && (
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-black/60 border border-brand-border/60">
+                        <span className="text-xs text-brand-muted font-mono">MOBILE LINE 1:</span>
+                        <a href={`tel:${mobile1.replace(/\s+/g, '')}`} className="font-semibold text-white hover:text-brand-green">
+                          {mobile1}
+                        </a>
+                      </div>
+                    )}
+                    {mobile2 && (
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-black/60 border border-brand-border/60">
+                        <span className="text-xs text-brand-muted font-mono">MOBILE LINE 2:</span>
+                        <a href={`tel:${mobile2.replace(/\s+/g, '')}`} className="font-semibold text-white hover:text-brand-green">
+                          {mobile2}
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -192,13 +198,13 @@ export default function ContactPage() {
                     Schedule Your Visit or Vehicle Transport
                   </h3>
                   <p className="text-gray-300 text-sm leading-relaxed">
-                    WALESS GROUP offers enclosed flatbed vehicle collection and delivery services across Ras Al Khaimah, Dubai, Abu Dhabi, and all northern Emirates.
+                    {companyName} offers enclosed flatbed vehicle collection and delivery services across Ras Al Khaimah, Dubai, Abu Dhabi, and all northern Emirates.
                   </p>
                   <button
                     onClick={() => setBookingModalOpen(true)}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-brand-green text-black font-heading font-bold text-xs uppercase tracking-wider hover:bg-brand-greenLight shadow-neon-sm transition-all"
                   >
-                    <Calendar className="w-4 h-4" />
+                    <Navigation className="w-4 h-4" />
                     <span>BOOK AN APPOINTMENT</span>
                   </button>
                 </div>
@@ -208,7 +214,7 @@ export default function ContactPage() {
         </section>
       </main>
 
-      <Footer onOpenBooking={() => setBookingModalOpen(true)} />
+      <Footer settings={settings} onOpenBooking={() => setBookingModalOpen(true)} />
 
       <BookingModal
         isOpen={bookingModalOpen}

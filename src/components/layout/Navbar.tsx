@@ -6,14 +6,17 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Calendar, ChevronRight } from 'lucide-react';
+import { SiteSettings } from '@/lib/types';
 
 interface NavbarProps {
   onOpenBooking?: () => void;
+  settings?: SiteSettings | null;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, settings: initialSettings }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [settings, setSettings] = useState<SiteSettings | null>(initialSettings || null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -27,6 +30,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!initialSettings) {
+      fetch('/api/site-settings?_t=' + Date.now(), { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.settings) setSettings(data.settings);
+        })
+        .catch((e) => console.warn('Navbar settings fetch warning:', e));
+    } else {
+      setSettings(initialSettings);
+    }
+  }, [initialSettings]);
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -42,6 +58,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
     return false;
   };
 
+  const logoUrl = (settings as any)?.logoUrl || '/icon.svg';
+  const companyName = settings?.companyName || 'WALESS GROUP';
+  const firstWord = companyName.split(' ')[0] || 'WALESS';
+  const secondWord = companyName.split(' ').slice(1).join(' ') || 'GROUP';
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -52,12 +73,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Logo */}
+          {/* Dynamic Logo */}
           <Link href="/" className="group flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-neon-sm group-hover:scale-105 transition-all duration-300">
+            <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-neon-sm group-hover:scale-105 transition-all duration-300 bg-black">
               <Image
-                src="/icon.svg"
-                alt="WALESS GROUP Logo"
+                src={logoUrl}
+                alt={`${companyName} Logo`}
                 fill
                 className="object-contain p-0.5"
                 priority
@@ -65,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
             </div>
             <div className="flex flex-col">
               <span className="font-heading font-extrabold text-xl tracking-widest text-white group-hover:text-brand-green transition-colors duration-300">
-                WALESS<span className="text-brand-green ml-1.5">GROUP</span>
+                {firstWord}<span className="text-brand-green ml-1.5">{secondWord}</span>
               </span>
               <span className="text-[10px] tracking-[0.25em] text-brand-muted uppercase font-medium">
                 Ras Al Khaimah • UAE

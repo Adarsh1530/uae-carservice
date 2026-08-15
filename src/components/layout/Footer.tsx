@@ -1,15 +1,43 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Phone, MapPin, Instagram, Calendar, ArrowUpRight } from 'lucide-react';
+import { SiteSettings } from '@/lib/types';
 
 interface FooterProps {
   onOpenBooking?: () => void;
+  settings?: SiteSettings | null;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenBooking, settings: initialSettings }) => {
+  const [settings, setSettings] = useState<SiteSettings | null>(initialSettings || null);
+
+  useEffect(() => {
+    if (!initialSettings) {
+      fetch('/api/site-settings?_t=' + Date.now(), { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.settings) setSettings(data.settings);
+        })
+        .catch((e) => console.warn('Footer settings fetch warning:', e));
+    } else {
+      setSettings(initialSettings);
+    }
+  }, [initialSettings]);
+
+  const logoUrl = (settings as any)?.logoUrl || '/icon.svg';
+  const companyName = settings?.companyName || 'WALESS GROUP';
+  const firstWord = companyName.split(' ')[0] || 'WALESS';
+  const secondWord = companyName.split(' ').slice(1).join(' ') || 'GROUP';
+  const address = settings?.address || 'AL DHAIT SOUTH, RAS AL KHAIMAH, UNITED ARAB EMIRATES';
+  const phone = settings?.phone || '+971 7 222 868';
+  const mobile1 = settings?.mobile1 || '+971 54 307 2733';
+  const mobile2 = settings?.mobile2 || '+971 54 307 2711';
+  const instagram = settings?.instagram || '@waless_group';
+  const instagramClean = instagram.replace('@', '');
+
   return (
     <footer className="relative bg-black border-t border-brand-border/60 overflow-hidden text-gray-400">
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-green/5 rounded-full blur-3xl pointer-events-none" />
@@ -20,11 +48,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-neon-sm">
-                <Image src="/icon.svg" alt="WALESS GROUP Logo" fill className="object-contain p-0.5" />
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-neon-sm bg-black">
+                <Image src={logoUrl} alt={`${companyName} Logo`} fill className="object-contain p-0.5" />
               </div>
               <span className="font-heading font-extrabold text-2xl tracking-widest text-white">
-                WALESS<span className="text-brand-green ml-1.5">GROUP</span>
+                {firstWord}<span className="text-brand-green ml-1.5">{secondWord}</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-gray-400">
@@ -32,13 +60,13 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
             </p>
             <div className="pt-2">
               <a
-                href="https://instagram.com/waless_group"
+                href={`https://instagram.com/${instagramClean}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-surface border border-brand-border text-xs font-semibold text-white hover:text-brand-green hover:border-brand-green/60 transition-all duration-300 shadow-neon-sm"
               >
                 <Instagram className="w-4 h-4 text-brand-green" />
-                <span>@waless_group</span>
+                <span>{instagram}</span>
                 <ArrowUpRight className="w-3 h-3 text-gray-500" />
               </a>
             </div>
@@ -79,29 +107,31 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
                 <span className="text-gray-300 leading-snug">
-                  AL DHAIT SOUTH,<br />
-                  RAS AL KHAIMAH,<br />
-                  UNITED ARAB EMIRATES
+                  {address}
                 </span>
               </div>
               <div className="flex items-center gap-3 pt-1">
                 <Phone className="w-4 h-4 text-brand-green shrink-0" />
-                <a href="tel:+9717222868" className="text-gray-300 hover:text-brand-green transition-colors">
-                  +971 7 222 868
+                <a href={`tel:${phone.replace(/\s+/g, '')}`} className="text-gray-300 hover:text-brand-green transition-colors">
+                  {phone}
                 </a>
               </div>
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-brand-green shrink-0" />
-                <a href="tel:+971543072733" className="text-gray-300 hover:text-brand-green transition-colors">
-                  +971 54 307 2733
-                </a>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-brand-green shrink-0" />
-                <a href="tel:+971543072711" className="text-gray-300 hover:text-brand-green transition-colors">
-                  +971 54 307 2711
-                </a>
-              </div>
+              {mobile1 && (
+                <div className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-brand-green shrink-0" />
+                  <a href={`tel:${mobile1.replace(/\s+/g, '')}`} className="text-gray-300 hover:text-brand-green transition-colors">
+                    {mobile1}
+                  </a>
+                </div>
+              )}
+              {mobile2 && (
+                <div className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-brand-green shrink-0" />
+                  <a href={`tel:${mobile2.replace(/\s+/g, '')}`} className="text-gray-300 hover:text-brand-green transition-colors">
+                    {mobile2}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 
@@ -125,7 +155,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-brand-border/40 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
-          <p>© {new Date().getFullYear()} WALESS GROUP. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} {companyName}. All Rights Reserved.</p>
           <div className="flex items-center gap-6">
             <span>Ras Al Khaimah • UAE</span>
             <Link href="/admin/login" className="hover:text-brand-green transition-colors">

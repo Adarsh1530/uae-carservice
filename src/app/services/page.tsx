@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Eye, Calendar, Sparkles, CheckCircle2, Search } from 'lucide-react';
+import { Eye, Calendar, CheckCircle2, Search } from 'lucide-react';
 
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -29,7 +29,7 @@ export default function ServicesPage() {
         if (data.success) setServices(data.services);
       });
 
-    fetch('/api/site-settings')
+    fetch('/api/site-settings?_t=' + Date.now(), { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setSettings(data.settings);
@@ -48,9 +48,11 @@ export default function ServicesPage() {
     setBookingModalOpen(true);
   };
 
+  const companyName = settings?.companyName || 'WALESS GROUP';
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col selection:bg-brand-green selection:text-black">
-      <Navbar onOpenBooking={() => handleOpenBooking()} />
+      <Navbar settings={settings} onOpenBooking={() => handleOpenBooking()} />
 
       <main className="flex-1">
         {/* Banner */}
@@ -64,7 +66,7 @@ export default function ServicesPage() {
               EXECUTIVE <span className="text-brand-green">SERVICES</span> & SOLUTIONS
             </h1>
             <p className="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-              Explore WALESS GROUP’s comprehensive suite of luxury automotive customization, performance engineering, paint protection, and corporate services.
+              Explore {companyName}’s comprehensive suite of luxury automotive customization, performance engineering, paint protection, and corporate services.
             </p>
 
             {/* Search Input */}
@@ -152,7 +154,7 @@ export default function ServicesPage() {
         </section>
       </main>
 
-      <Footer onOpenBooking={() => handleOpenBooking()} />
+      <Footer settings={settings} onOpenBooking={() => handleOpenBooking()} />
 
       <ServiceDetailModal
         service={activeServiceModal}

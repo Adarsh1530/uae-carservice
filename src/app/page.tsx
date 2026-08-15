@@ -11,7 +11,6 @@ import {
   ArrowRight,
   ChevronRight,
   Phone,
-  MapPin,
   Calendar,
   Layers,
   Wrench,
@@ -40,7 +39,7 @@ export default function HomePage() {
 
   useEffect(() => {
     // Fetch Settings
-    fetch('/api/site-settings')
+    fetch('/api/site-settings?_t=' + Date.now(), { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setSettings(data.settings);
@@ -67,10 +66,13 @@ export default function HomePage() {
     setBookingModalOpen(true);
   };
 
+  const primaryPhone = settings?.phone || '+971 7 222 868';
+  const companyName = settings?.companyName || 'WALESS GROUP';
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col selection:bg-brand-green selection:text-black">
       {/* Navigation Header */}
-      <Navbar onOpenBooking={() => handleOpenBooking()} />
+      <Navbar settings={settings} onOpenBooking={() => handleOpenBooking()} />
 
       <main className="flex-1">
         {/* ================= HERO SECTION ================= */}
@@ -104,7 +106,7 @@ export default function HomePage() {
 
                 <p className="text-gray-300 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0">
                   {settings?.heroSubheading ||
-                    'WHALESS GROUP delivers ultra-luxury bespoke vehicle customization, high-performance tuning, and elite corporate services across Ras Al Khaimah and the UAE.'}
+                    'WALESS GROUP delivers ultra-luxury bespoke vehicle customization, high-performance tuning, and elite corporate services across Ras Al Khaimah and the UAE.'}
                 </p>
 
                 {/* CTAs */}
@@ -154,7 +156,7 @@ export default function HomePage() {
                   <div className="relative h-[380px] sm:h-[450px] w-full rounded-xl overflow-hidden border border-brand-border bg-brand-surface">
                     <Image
                       src={settings?.heroImageUrl || '/uploads/home_page.jpg'}
-                      alt="WHALESS GROUP Flagship Automobile"
+                      alt={`${companyName} Flagship Automobile`}
                       fill
                       className="object-cover hover:scale-105 transition-transform duration-700"
                       priority
@@ -162,7 +164,7 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6 p-4 rounded-xl bg-black/80 backdrop-blur-md border border-brand-green/30">
                       <span className="text-[10px] font-mono text-brand-green tracking-widest uppercase block">
-                        <span className="text-brand-green">WALESS GROUP</span> UAE
+                        <span className="text-brand-green">{companyName}</span> UAE
                       </span>
                       <h3 className="font-heading font-bold text-white text-sm">
                         Mastery in Automobile Artistry
@@ -183,7 +185,7 @@ export default function HomePage() {
                 <div className="relative h-96 sm:h-[450px] w-full rounded-2xl overflow-hidden border border-brand-border shadow-neon-sm">
                   <Image
                     src={settings?.aboutImageUrl || '/uploads/gallery__1_.jpg'}
-                    alt="WALESS GROUP Headquarters"
+                    alt={`${companyName} Headquarters`}
                     fill
                     className="object-cover"
                   />
@@ -193,13 +195,13 @@ export default function HomePage() {
 
               <div className="lg:col-span-6 space-y-6">
                 <span className="text-xs font-mono uppercase tracking-widest text-brand-green border-l-2 border-brand-green pl-3">
-                  ABOUT WALESS GROUP
+                  ABOUT {companyName}
                 </span>
                 <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
-                  Crafting Extraordinary Automotive Standard in Ras Al Khaimah
+                  Crafting Extraordinary Automotive Standards in Ras Al Khaimah
                 </h2>
                 <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                  WALESS GROUP stands as Ras Al Khaimah’s premier house for automotive refinement and executive solutions. Founded on principles of precision engineering, uncompromising quality, and stealth luxury aesthetics, we cater to discerning automobile owners, collectors, and corporate enterprises across the United Arab Emirates.
+                  {companyName} stands as Ras Al Khaimah’s premier house for automotive refinement and executive solutions. Founded on principles of precision engineering, uncompromising quality, and stealth luxury aesthetics, we cater to discerning automobile owners, collectors, and corporate enterprises across the United Arab Emirates.
                 </p>
                 <div className="space-y-3 pt-2">
                   {[
@@ -359,10 +361,10 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
               <span className="text-xs font-mono uppercase tracking-widest text-brand-green px-3.5 py-1 rounded-full bg-brand-green/10 border border-brand-green/30">
-                THE WHALESS ADVANTAGE
+                THE ADVANTAGE
               </span>
               <h2 className="font-heading font-black text-3xl sm:text-5xl text-white tracking-tight">
-                Why Clients Trust WALESS GROUP
+                Why Clients Trust {companyName}
               </h2>
             </div>
 
@@ -422,11 +424,11 @@ export default function HomePage() {
                 <span>BOOK APPOINTMENT</span>
               </button>
               <a
-                href="tel:+9717222868"
+                href={`tel:${primaryPhone.replace(/\s+/g, '')}`}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-black border border-brand-border text-white font-heading font-bold text-xs uppercase tracking-wider hover:border-brand-green hover:text-brand-green transition-all"
               >
                 <Phone className="w-4 h-4 text-brand-green" />
-                <span>CALL +971 7 222 868</span>
+                <span>CALL {primaryPhone}</span>
               </a>
             </div>
           </div>
@@ -434,7 +436,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <Footer onOpenBooking={() => handleOpenBooking()} />
+      <Footer settings={settings} onOpenBooking={() => handleOpenBooking()} />
 
       {/* Modals */}
       <ServiceDetailModal
