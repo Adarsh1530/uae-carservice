@@ -93,13 +93,12 @@ export default function AdminBookingsPage() {
           address: targetBooking.address,
         });
 
-        // Trigger notification modal & open WhatsApp
+        // Trigger notification modal
         setWhatsappNotifyModal({
           type: 'ACCEPT',
           booking: targetBooking,
           whatsappUrl: waUrl,
         });
-        window.open(waUrl, '_blank');
       } else {
         alert(data.error || 'Failed to accept booking');
       }
@@ -145,13 +144,12 @@ export default function AdminBookingsPage() {
           requestedDate: targetBooking.requestedDate,
         });
 
-        // Trigger notification modal & open WhatsApp
+        // Trigger notification modal
         setWhatsappNotifyModal({
           type: 'REJECT',
           booking: targetBooking,
           whatsappUrl: waUrl,
         });
-        window.open(waUrl, '_blank');
       } else {
         alert(data.error || 'Failed to reject booking');
       }
@@ -242,60 +240,81 @@ export default function AdminBookingsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-border/40 text-gray-300">
-                {bookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 font-mono font-bold text-brand-green">{b.referenceId}</td>
-                    <td className="p-4 font-semibold text-white">{b.fullName}</td>
-                    <td className="p-4 text-gray-300">{b.serviceName}</td>
-                    <td className="p-4 font-mono">{b.phone}</td>
-                    <td className="p-4">{b.requestedDate}</td>
-                    <td className="p-4 text-gray-500">{formatDate(b.createdAt)}</td>
-                    <td className="p-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                          b.status === 'ACCEPTED'
-                            ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/40'
-                            : b.status === 'REJECTED'
-                            ? 'bg-red-950/60 text-red-400 border-red-500/40'
-                            : 'bg-amber-950/60 text-amber-400 border-amber-500/40'
-                        }`}
-                      >
-                        {b.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right space-x-2">
-                      <button
-                        onClick={() => setSelectedBookingDetails(b)}
-                        className="p-1.5 rounded-lg bg-black border border-brand-border text-gray-300 hover:text-white hover:border-brand-green transition-colors"
-                        title="View Full Details"
-                      >
-                        <Eye className="w-4 h-4 text-brand-green" />
-                      </button>
+                {bookings.map((b) => {
+                  const waUrl =
+                    b.status === 'ACCEPTED'
+                      ? buildAcceptWhatsAppUrl(b)
+                      : b.status === 'REJECTED'
+                      ? buildRejectWhatsAppUrl(b)
+                      : null;
 
-                      {b.status === 'PENDING' && (
-                        <>
-                          <button
-                            onClick={() => setAcceptModalBooking(b)}
-                            className="p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-800/80 transition-colors"
-                            title="Accept Request"
+                  return (
+                    <tr key={b.id} className="hover:bg-white/5 transition-colors">
+                      <td className="p-4 font-mono font-bold text-brand-green">{b.referenceId}</td>
+                      <td className="p-4 font-semibold text-white">{b.fullName}</td>
+                      <td className="p-4 text-gray-300">{b.serviceName}</td>
+                      <td className="p-4 font-mono">{b.phone}</td>
+                      <td className="p-4">{b.requestedDate}</td>
+                      <td className="p-4 text-gray-500">{formatDate(b.createdAt)}</td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            b.status === 'ACCEPTED'
+                              ? 'bg-emerald-950/60 text-emerald-400 border-emerald-500/40'
+                              : b.status === 'REJECTED'
+                              ? 'bg-red-950/60 text-red-400 border-red-500/40'
+                              : 'bg-amber-950/60 text-amber-400 border-amber-500/40'
+                          }`}
+                        >
+                          {b.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right space-x-2">
+                        <button
+                          onClick={() => setSelectedBookingDetails(b)}
+                          className="p-1.5 rounded-lg bg-black border border-brand-border text-gray-300 hover:text-white hover:border-brand-green transition-colors"
+                          title="View Full Details"
+                        >
+                          <Eye className="w-4 h-4 text-brand-green" />
+                        </button>
+
+                        {waUrl && (
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/60 text-emerald-400 hover:bg-emerald-800/80 transition-colors"
+                            title="Send WhatsApp Notification"
                           >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setRejectModalBooking(b);
-                              setRejectionReason('');
-                            }}
-                            className="p-1.5 rounded-lg bg-red-950/80 border border-red-500/50 text-red-400 hover:bg-red-800/80 transition-colors"
-                            title="Reject Request"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                            <MessageSquare className="w-4 h-4" />
+                          </a>
+                        )}
+
+                        {b.status === 'PENDING' && (
+                          <>
+                            <button
+                              onClick={() => setAcceptModalBooking(b)}
+                              className="p-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-800/80 transition-colors"
+                              title="Accept Request"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setRejectModalBooking(b);
+                                setRejectionReason('');
+                              }}
+                              className="p-1.5 rounded-lg bg-red-950/80 border border-red-500/50 text-red-400 hover:bg-red-800/80 transition-colors"
+                              title="Reject Request"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -425,7 +444,7 @@ export default function AdminBookingsPage() {
                 disabled={actionLoading}
                 className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-heading font-bold"
               >
-                {actionLoading ? 'ACCEPTING...' : 'CONFIRM & SEND WHATSAPP'}
+                {actionLoading ? 'ACCEPTING...' : 'CONFIRM ACCEPT'}
               </button>
             </div>
           </div>
@@ -477,7 +496,7 @@ export default function AdminBookingsPage() {
                 disabled={actionLoading}
                 className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-heading font-bold"
               >
-                {actionLoading ? 'REJECTING...' : 'REJECT & SEND WHATSAPP'}
+                {actionLoading ? 'REJECTING...' : 'REJECT REQUEST'}
               </button>
             </div>
           </form>
@@ -504,7 +523,7 @@ export default function AdminBookingsPage() {
             </h3>
 
             <p className="text-xs text-gray-300">
-              Status updated for <strong className="text-brand-green">{whatsappNotifyModal.booking.fullName}</strong> ({whatsappNotifyModal.booking.referenceId}). Click below to open WhatsApp and send the official notification message.
+              Status updated for <strong className="text-brand-green">{whatsappNotifyModal.booking.fullName}</strong> ({whatsappNotifyModal.booking.referenceId}). Click the button below to send the official WhatsApp message to the customer.
             </p>
 
             <div className="p-4 rounded-xl bg-black/90 border border-brand-border text-left space-y-2">
@@ -542,9 +561,10 @@ WALESS GROUP`}
                 href={whatsappNotifyModal.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-heading font-bold text-xs uppercase tracking-wider shadow-neon-sm"
+                onClick={() => setWhatsappNotifyModal(null)}
+                className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-heading font-bold text-xs uppercase tracking-wider shadow-neon-md cursor-pointer transition-all"
               >
-                <span>OPEN WHATSAPP</span>
+                <span>OPEN WHATSAPP NOW</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>

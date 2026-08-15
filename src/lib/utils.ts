@@ -25,6 +25,15 @@ export function generateBookingReferenceId(): string {
   return `WG-${year}-${randomNum}`;
 }
 
+export function cleanPhoneNumber(phone: string): string {
+  if (!phone) return '';
+  let cleaned = phone.replace(/[^0-9]/g, '');
+  if (cleaned.startsWith('05') && cleaned.length === 10) {
+    cleaned = `971${cleaned.slice(1)}`;
+  }
+  return cleaned;
+}
+
 export function buildAcceptWhatsAppUrl(booking: {
   fullName: string;
   phone: string;
@@ -33,7 +42,7 @@ export function buildAcceptWhatsAppUrl(booking: {
   requestedDate: string;
   address?: string;
 }) {
-  const cleanPhone = booking.phone.replace(/[^0-9]/g, '');
+  const cleanPhone = cleanPhoneNumber(booking.phone);
   const location = booking.address && booking.address.trim()
     ? booking.address.trim()
     : 'AL DHAIT SOUTH, RAS AL KHAIMAH, UAE';
@@ -57,7 +66,7 @@ export function buildRejectWhatsAppUrl(booking: {
   referenceId: string;
   requestedDate: string;
 }) {
-  const cleanPhone = booking.phone.replace(/[^0-9]/g, '');
+  const cleanPhone = cleanPhoneNumber(booking.phone);
 
   const text = `Hello ${booking.fullName},
 We regret to inform you that your booking request for ${booking.serviceName} and ${booking.referenceId} on ${booking.requestedDate} at 10:00 AM has been rejected.
@@ -82,7 +91,7 @@ export function buildWhatsAppUrl(
     description?: string | null;
   }
 ): string {
-  const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
+  const cleanNumber = cleanPhoneNumber(whatsappNumber);
 
   const text = `*WALESS GROUP BOOKING*
 
