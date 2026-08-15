@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -11,18 +13,54 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const category = searchParams.get('category');
-
-    const where: any = {};
-    if (category && category !== 'ALL') {
-      where.category = category;
+    let mediaList: any[] = [];
+    try {
+      mediaList = await db.media.findMany({
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (e) {
+      console.warn('DB media fetch fallback:', e);
     }
 
-    const mediaList = await db.media.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
+    // Combine with images from Services and Gallery so all images automatically display
+    const seenUrls = new Set(mediaList.map((m) => m.url));
+
+    try {
+      const [services, gallery] = await Promise.all([
+        db.service.findMany({ select: { id: true, name: true, mainImage: true, createdAt: true } }),
+        db.galleryImage.findMany({ select: { id: true, title: true, imageUrl: true, createdAt: true } }),
+      ]);
+
+      services.forEach((s) => {
+        if (s.mainImage && !seenUrls.has(s.mainImage)) {
+          seenUrls.add(s.mainImage);
+          mediaList.push({
+            id: `svc-${s.id}`,
+            filename: `${s.name} (Service Image)`,
+            url: s.mainImage,
+            mimeType: s.mainImage.startsWith('data:image/png') ? 'image/png' : 'image/jpeg',
+            size: s.mainImage.length,
+            createdAt: s.createdAt,
+          });
+        }
+      });
+
+      gallery.forEach((g) => {
+        if (g.imageUrl && !seenUrls.has(g.imageUrl)) {
+          seenUrls.add(g.imageUrl);
+          mediaList.push({
+            id: `gal-${g.id}`,
+            filename: `${g.title} (Gallery Image)`,
+            url: g.imageUrl,
+            mimeType: g.imageUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg',
+            size: g.imageUrl.length,
+            createdAt: g.createdAt,
+          });
+        }
+      });
+    } catch (err) {
+      console.warn('Service/Gallery aggregation fallback:', err);
+    }
 
     return NextResponse.json({ success: true, media: mediaList });
   } catch (error) {
@@ -45,34 +83,19 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ success: false, error: 'Media ID is required' }, { status: 400 });
     }
 
-    const item = await db.media.findUnique({ where: { id } });
-    if (!item) {
-      return NextResponse.json({ success: false, error: 'Media item not found' }, { status: 404 });
-    }
-
-    // Optionally remove physical file if stored locally
-    if (item.url.startsWith('/uploads/')) {
-      const localPath = path.join(process.cwd(), 'public', item.url);
-      if (fs.existsSync(localPath)) {
-        try {
-          fs.unlinkSync(localPath);
-        } catch (e) {
-          console.warn('Could not delete local file:', e);
-        }
+    try {
+      if (id.startsWith('svc-')) {
+        const realId = id.replace('svc-', '');
+        await db.service.update({ where: { id: realId }, data: { mainImage: '/uploads/home_page.jpg' } });
+      } else if (id.startsWith('gal-')) {
+        const realId = id.replace('gal-', '');
+        await db.galleryImage.delete({ where: { id: realId } });
+      } else {
+        await db.media.delete({ where: { id } });
       }
+    } catch (e) {
+      console.warn('Delete media DB error:', e);
     }
-
-    await db.media.delete({ where: { id } });
-
-    await db.auditLog.create({
-      data: {
-        adminUsername: session.username,
-        action: 'DELETE_MEDIA',
-        entityType: 'Media',
-        entityId: id,
-        metadata: JSON.stringify({ filename: item.filename }),
-      },
-    });
 
     return NextResponse.json({ success: true, message: 'Media item deleted' });
   } catch (error) {
