@@ -158,9 +158,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking, settings: initial
           <p>© {new Date().getFullYear()} {companyName}. All Rights Reserved.</p>
           <div className="flex items-center gap-6">
             <span>Ras Al Khaimah • UAE</span>
-            <Link href="/admin/login" className="hover:text-brand-green transition-colors">
-              Admin Portal
-            </Link>
           </div>
         </div>
       </div>
