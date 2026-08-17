@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { FolderOpen, Upload, Trash2, Copy, Check, Search, Loader2 } from 'lucide-react';
 
+import { compressAndUploadImage } from '@/lib/clientUpload';
+
 export default function AdminMediaPage() {
   const [mediaList, setMediaList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,23 +32,17 @@ export default function AdminMediaPage() {
     if (!file) return;
     setUploading(true);
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('category', 'MediaLibrary');
-
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.success) {
-        fetchMedia();
+      await compressAndUploadImage(file, 'MediaLibrary');
+      fetchMedia();
+    } catch (err: any) {
+      console.error('Media upload error:', err);
+      if (err.message?.includes('Unauthorized')) {
+        alert('Your session expired. Please sign in to the Admin Panel.');
+        window.location.href = '/admin/login';
       } else {
-        alert(data.error || 'Upload failed');
+        alert(err.message || 'Upload failed');
       }
-    } catch (e) {
-      console.error(e);
     } finally {
       setUploading(false);
     }

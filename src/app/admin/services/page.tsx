@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { ServiceItem } from '@/lib/types';
+import { compressAndUploadImage } from '@/lib/clientUpload';
 
 export default function AdminServicesPage() {
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -94,23 +95,18 @@ export default function AdminServicesPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const data = new FormData();
-    data.append('file', file);
-    data.append('category', 'Services');
 
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: data,
-      });
-      const resData = await res.json();
-      if (resData.success && resData.url) {
-        setFormData((prev) => ({ ...prev, mainImage: resData.url }));
+      const uploadedUrl = await compressAndUploadImage(file, 'Services');
+      setFormData((prev) => ({ ...prev, mainImage: uploadedUrl }));
+    } catch (err: any) {
+      console.error('Service image upload error:', err);
+      if (err.message?.includes('Unauthorized')) {
+        alert('Your session expired. Please sign in to the Admin Panel.');
+        window.location.href = '/admin/login';
       } else {
-        alert(resData.error || 'Upload failed');
+        alert(err.message || 'Upload failed');
       }
-    } catch (err) {
-      console.error(err);
     } finally {
       setUploading(false);
     }

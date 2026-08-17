@@ -13,6 +13,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { GalleryItem } from '@/lib/types';
+import { compressAndUploadImage } from '@/lib/clientUpload';
 
 export default function AdminGalleryPage() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -65,29 +66,23 @@ export default function AdminGalleryPage() {
     setDisplayOrder(item.displayOrder);
     setModalOpen(true);
   };
-
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const data = new FormData();
-    data.append('file', file);
-    data.append('category', 'Gallery');
 
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: data,
-      });
-      const resData = await res.json();
-      if (resData.success && resData.url) {
-        setImageUrl(resData.url);
-        if (!title) setTitle(file.name.replace(/\.[^/.]+$/, ''));
+      const uploadedUrl = await compressAndUploadImage(file, 'Gallery');
+      setImageUrl(uploadedUrl);
+      if (!title) setTitle(file.name.replace(/\.[^/.]+$/, ''));
+    } catch (err: any) {
+      console.error('Gallery image upload error:', err);
+      if (err.message?.includes('Unauthorized')) {
+        alert('Your session expired. Please sign in to the Admin Panel.');
+        window.location.href = '/admin/login';
       } else {
-        alert(resData.error || 'Upload failed');
+        alert(err.message || 'Upload failed');
       }
-    } catch (err) {
-      console.error(err);
     } finally {
       setUploading(false);
     }

@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Settings, Save, Loader2, CheckCircle2, Upload } from 'lucide-react';
 import { SiteSettings } from '@/lib/types';
+import { compressAndUploadImage } from '@/lib/clientUpload';
 
 const DEFAULT_SETTINGS: SiteSettings = {
   id: 'default',
@@ -29,6 +31,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
 };
 
 export default function AdminSettingsPage() {
+  const router = useRouter();
   const [settings, setSettings] = useState<any>({ ...DEFAULT_SETTINGS, logoUrl: '/icon.svg' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,7 +39,7 @@ export default function AdminSettingsPage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
-    fetch('/api/site-settings')
+    fetch('/api/site-settings?_t=' + Date.now(), { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.settings) {
@@ -51,23 +54,18 @@ export default function AdminSettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingLogo(true);
-    const data = new FormData();
-    data.append('file', file);
-    data.append('category', 'Logos');
 
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: data,
-      });
-      const resData = await res.json();
-      if (resData.success && resData.url) {
-        setSettings((prev: any) => ({ ...prev, logoUrl: resData.url }));
-      } else {
-        alert(resData.error || 'Upload failed');
-      }
-    } catch (err) {
+      const uploadedUrl = await compressAndUploadImage(file, 'Logos');
+      setSettings((prev: any) => ({ ...prev, logoUrl: uploadedUrl }));
+    } catch (err: any) {
       console.error('Logo upload error:', err);
+      if (err.message?.includes('Unauthorized')) {
+        alert('Your session expired. Please sign in to the Admin Panel.');
+        router.push('/admin/login');
+      } else {
+        alert(err.message || 'Logo upload failed');
+      }
     } finally {
       setUploadingLogo(false);
     }
@@ -85,13 +83,23 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(settings),
       });
 
+      if (res.status === 401) {
+        alert('Your session expired. Please sign in to the Admin Panel.');
+        router.push('/admin/login');
+        return;
+      }
+
       const data = await res.json();
       if (data.success) {
         setSuccessMsg('Site settings and logo updated successfully!');
         if (data.settings) setSettings((prev: any) => ({ ...prev, ...data.settings }));
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
-        alert(data.error || 'Failed to update settings');
+        if (data.error === 'Unauthorized session') {
+          router.push('/admin/login');
+        } else {
+          alert(data.error || 'Failed to update settings');
+        }
       }
     } catch (e) {
       console.error(e);
