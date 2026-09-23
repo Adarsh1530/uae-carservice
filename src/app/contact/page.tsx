@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Phone, MapPin, Instagram, MessageCircle, Navigation } from 'lucide-react';
+import { Phone, MapPin, Instagram, MessageCircle, Navigation, Mail } from 'lucide-react';
 
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -124,6 +124,29 @@ export default function ContactPage() {
                         </a>
                       </div>
                     )}
+                  </div>
+                </div>
+
+                {/* Official Email Card */}
+                <div className="p-6 rounded-2xl bg-brand-surface border border-brand-border space-y-4">
+                  <h3 className="font-heading font-bold text-white text-base border-l-2 border-brand-green pl-3">
+                    OFFICIAL BUSINESS EMAILS
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-black/60 border border-brand-border/60">
+                      <span className="text-xs text-brand-muted font-mono">GENERAL INQUIRIES:</span>
+                      <a href="mailto:info@walessgroup.ae" className="font-semibold text-white hover:text-brand-green flex items-center gap-1.5 font-mono text-xs">
+                        <Mail className="w-3.5 h-3.5 text-brand-green" />
+                        info@walessgroup.ae
+                      </a>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-black/60 border border-brand-border/60">
+                      <span className="text-xs text-brand-muted font-mono">ACCOUNTS & BILLING:</span>
+                      <a href="mailto:accounts@walessgroup.ae" className="font-semibold text-white hover:text-brand-green flex items-center gap-1.5 font-mono text-xs">
+                        <Mail className="w-3.5 h-3.5 text-brand-green" />
+                        accounts@walessgroup.ae
+                      </a>
+                    </div>
                   </div>
                 </div>
 

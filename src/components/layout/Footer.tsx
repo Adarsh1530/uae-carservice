@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Phone, MapPin, Instagram, Calendar, ArrowUpRight } from 'lucide-react';
+import { Phone, MapPin, Instagram, Calendar, ArrowUpRight, Mail } from 'lucide-react';
 import { SiteSettings } from '@/lib/types';
 
 interface FooterProps {
@@ -132,6 +132,18 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking, settings: initial
                   </a>
                 </div>
               )}
+              <div className="flex items-center gap-3 pt-2 border-t border-brand-border/40">
+                <Mail className="w-4 h-4 text-brand-green shrink-0" />
+                <a href="mailto:info@walessgroup.ae" className="text-gray-300 hover:text-brand-green transition-colors text-xs font-mono">
+                  info@walessgroup.ae
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="w-4 h-4 text-brand-green shrink-0" />
+                <a href="mailto:accounts@walessgroup.ae" className="text-gray-300 hover:text-brand-green transition-colors text-xs font-mono">
+                  accounts@walessgroup.ae
+                </a>
+              </div>
             </div>
           </div>
 
