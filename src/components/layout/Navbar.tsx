@@ -48,6 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, settings: initial
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Services', href: '/services' },
+    { name: 'VIP Club', href: '/loyalty' },
     { name: 'Gallery', href: '/gallery' },
     { name: 'Contact', href: '/contact' },
   ];

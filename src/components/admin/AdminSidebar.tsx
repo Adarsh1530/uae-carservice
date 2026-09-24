@@ -16,6 +16,7 @@ import {
   Globe,
   Menu,
   X,
+  Award,
 } from 'lucide-react';
 import { SiteSettings } from '@/lib/types';
 
@@ -49,6 +50,7 @@ export const AdminSidebar = () => {
 
   const navItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Loyalty Program', href: '/admin/loyalty', icon: Award },
     { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
     { name: 'Services', href: '/admin/services', icon: Layers },
     { name: 'Gallery', href: '/admin/gallery', icon: ImageIcon },

@@ -19,6 +19,8 @@ export async function GET() {
       totalServices: 0,
       totalGallery: 0,
       totalMedia: 0,
+      totalLoyaltyMembers: 0,
+      totalLoyaltyRedemptions: 0,
     };
     let recentBookings: any[] = [];
     let recentLogs: any[] = [];
@@ -32,6 +34,8 @@ export async function GET() {
         totalServices,
         totalGallery,
         totalMedia,
+        totalLoyaltyMembers,
+        totalLoyaltyRedemptions,
         bookingsList,
         logsList,
       ] = await Promise.all([
@@ -42,6 +46,8 @@ export async function GET() {
         db.service.count(),
         db.galleryImage.count(),
         db.media.count(),
+        db.loyaltyCustomer.count(),
+        db.loyaltyRedemption.count(),
         db.booking.findMany({ take: 6, orderBy: { createdAt: 'desc' } }),
         db.auditLog.findMany({ take: 8, orderBy: { createdAt: 'desc' } }),
       ]);
@@ -54,6 +60,8 @@ export async function GET() {
         totalServices,
         totalGallery,
         totalMedia,
+        totalLoyaltyMembers,
+        totalLoyaltyRedemptions,
       };
       recentBookings = bookingsList;
       recentLogs = logsList;

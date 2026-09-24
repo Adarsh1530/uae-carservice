@@ -109,3 +109,51 @@ Please confirm my appointment. Thank you!`;
 }
 
 export const buildWhatsAppLink = buildWhatsAppUrl;
+
+export function generateLoyaltyId(): string {
+  const randomNum = Math.floor(1000 + Math.random() * 9000);
+  return `WG-VIP-${randomNum}`;
+}
+
+export function generateRedemptionCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let result = 'RDM-';
+  for (let i = 0; i < 5; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+export function buildLoyaltyWhatsAppUrl(customer: {
+  fullName: string;
+  phone: string;
+  loyaltyId: string;
+  currentStamps: number;
+  stampsPerReward: number;
+  rewardTitle?: string;
+  cardUrl?: string;
+}): string {
+  const cleanPhone = cleanPhoneNumber(customer.phone);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://walessgroup.ae';
+  const passUrl = customer.cardUrl || `${siteUrl}/loyalty?lookup=${customer.loyaltyId}`;
+
+  const text = `🌟 *WALESS GROUP VIP LOYALTY PASS* 🌟
+
+Hello ${customer.fullName},
+Your official WALESS VIP Loyalty Pass is active!
+
+💳 *Member ID:* ${customer.loyaltyId}
+⭐ *Current Progress:* ${customer.currentStamps}/${customer.stampsPerReward} Stamps
+🎁 *Target Reward:* ${customer.rewardTitle || '1 Free Bespoke Finish'}
+
+📲 *Access Your Digital Pass & QR:*
+${passUrl}
+
+Present your digital pass or Member ID upon vehicle arrival at our workshop in Al Dhait South, Ras Al Khaimah to collect stamps and unlock complimentary luxury services.
+
+Thank you for choosing WALESS GROUP!
+📞 +971 7 222 868 | 🌐 walessgroup.ae`;
+
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+}
+

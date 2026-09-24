@@ -16,6 +16,7 @@ import {
   Check,
   X,
   Eye,
+  Award,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { BookingItem } from '@/lib/types';
@@ -63,13 +64,23 @@ export default function AdminDashboardPage() {
           </h1>
         </div>
 
-        <Link
-          href="/admin/bookings"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-green text-black font-heading font-bold text-xs uppercase tracking-wider hover:bg-brand-greenLight shadow-neon-sm transition-all"
-        >
-          <Calendar className="w-4 h-4" />
-          <span>Manage Bookings ({stats?.pendingBookings || 0} Pending)</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/loyalty"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black border border-brand-green/50 text-brand-green font-heading font-bold text-xs uppercase tracking-wider hover:bg-brand-green/20 shadow-neon-sm transition-all"
+          >
+            <Award className="w-4 h-4" />
+            <span>Loyalty Hub ({stats?.totalLoyaltyMembers || 0} Members)</span>
+          </Link>
+
+          <Link
+            href="/admin/bookings"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-green text-black font-heading font-bold text-xs uppercase tracking-wider hover:bg-brand-greenLight shadow-neon-sm transition-all"
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Manage Bookings ({stats?.pendingBookings || 0} Pending)</span>
+          </Link>
+        </div>
       </div>
 
       {/* Metric Cards Grid */}

@@ -73,3 +73,96 @@ export interface AdminUser {
   name: string;
   role: string;
 }
+
+export interface LoyaltyConfig {
+  id: string;
+  programName: string;
+  programTagline: string;
+  isActive: boolean;
+  rewardMode: 'STAMPS' | 'POINTS';
+  stampsPerReward: number;
+  stampsPerVisit: number;
+  pointsPerAed: number;
+  rewardExpiryDays: number;
+  rewardTitle: string;
+  rewardDescription: string;
+  termsConditions: string;
+  updatedAt?: Date | string;
+}
+
+export interface LoyaltyCustomerItem {
+  id: string;
+  loyaltyId: string;
+  fullName: string;
+  phone: string;
+  email?: string | null;
+  plateNumber?: string | null;
+  vehicleMake?: string | null;
+  vehicleModel?: string | null;
+  vehicleYear?: string | null;
+  status: 'ACTIVE' | 'SUSPENDED';
+  currentStamps: number;
+  lifetimeStamps: number;
+  currentPoints: number;
+  lifetimePoints: number;
+  qrCodeToken: string;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
+  transactions?: LoyaltyTransactionItem[];
+  redemptions?: LoyaltyRedemptionItem[];
+}
+
+export interface LoyaltyRewardItem {
+  id: string;
+  title: string;
+  description: string;
+  requiredStamps: number;
+  requiredPoints: number;
+  validDays: number;
+  isActive: boolean;
+  redemptionLimit?: number | null;
+  redemptionCount: number;
+  displayOrder: number;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+export interface LoyaltyRedemptionItem {
+  id: string;
+  redemptionCode: string;
+  customerId: string;
+  rewardId: string;
+  rewardTitle: string;
+  status: 'COMPLETED' | 'REVERSED';
+  serviceReference?: string | null;
+  adminUsername: string;
+  notes?: string | null;
+  redeemedAt: Date | string;
+  reversedAt?: Date | string | null;
+  reversedBy?: string | null;
+  customer?: {
+    fullName: string;
+    phone: string;
+    loyaltyId: string;
+    plateNumber?: string | null;
+  };
+}
+
+export interface LoyaltyTransactionItem {
+  id: string;
+  customerId: string;
+  type: string;
+  amount: number;
+  balanceAfter: number;
+  serviceName?: string | null;
+  serviceReference?: string | null;
+  adminUsername?: string | null;
+  notes?: string | null;
+  createdAt: Date | string;
+  customer?: {
+    fullName: string;
+    phone: string;
+    loyaltyId: string;
+  };
+}
+

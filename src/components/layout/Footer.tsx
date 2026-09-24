@@ -82,6 +82,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking, settings: initial
                 { name: 'Home', href: '/' },
                 { name: 'About Us', href: '/about' },
                 { name: 'Our Services', href: '/services' },
+                { name: 'VIP Loyalty Pass', href: '/loyalty' },
                 { name: 'Project Gallery', href: '/gallery' },
                 { name: 'Contact & Map', href: '/contact' },
               ].map((item) => (

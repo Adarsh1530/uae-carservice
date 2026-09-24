@@ -120,3 +120,101 @@ model AuditLog {
 
   @@map("audit_logs")
 }
+
+model LoyaltyProgramConfig {
+  id                String   @id @default("default")
+  programName       String   @default("WALESS VIP LOYALTY PASS")
+  programTagline    String   @default("BUY 4 SERVICES = 1 FREE BESPOKE FINISH")
+  isActive          Boolean  @default(true)
+  rewardMode        String   @default("STAMPS") // STAMPS | POINTS
+  stampsPerReward   Int      @default(4)
+  stampsPerVisit    Int      @default(1)
+  pointsPerAed      Float    @default(1.0)
+  rewardExpiryDays  Int      @default(365) // 0 for no expiry
+  rewardTitle       String   @default("1 FREE BESPOKE FINISH")
+  rewardDescription String   @default("Enjoy a complimentary bespoke finish or luxury detailing service after collecting 4 service stamps.")
+  termsConditions   String   @default("• Present your digital loyalty pass or member ID upon vehicle arrival at WALESS GROUP.\n• Receive 1 stamp for each qualifying service or maintenance visit.\n• Redeem your free reward once the required stamps have been accumulated.\n• Valid exclusively at WALESS GROUP Al Dhait South, Ras Al Khaimah, UAE.\n• Passes and rewards are non-transferable, cannot be redeemed for cash, and cannot be combined with conflicting promotional discounts.")
+  updatedAt         DateTime @updatedAt
+
+  @@map("loyalty_program_config")
+}
+
+model LoyaltyCustomer {
+  id             String   @id @default(cuid())
+  loyaltyId      String   @unique // e.g. "WG-VIP-1029"
+  fullName       String
+  phone          String   @unique
+  email          String?
+  plateNumber    String?
+  vehicleMake    String?
+  vehicleModel   String?
+  vehicleYear    String?
+  status         String   @default("ACTIVE") // ACTIVE, SUSPENDED
+  currentStamps  Int      @default(0)
+  lifetimeStamps Int      @default(0)
+  currentPoints  Int      @default(0)
+  lifetimePoints Int      @default(0)
+  qrCodeToken    String   @unique // secure token for QR
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  transactions   LoyaltyTransaction[]
+  redemptions    LoyaltyRedemption[]
+
+  @@map("loyalty_customers")
+}
+
+model LoyaltyReward {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  requiredStamps  Int      @default(4)
+  requiredPoints  Int      @default(0)
+  validDays       Int      @default(90)
+  isActive        Boolean  @default(true)
+  redemptionLimit Int?
+  redemptionCount Int      @default(0)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  redemptions     LoyaltyRedemption[]
+
+  @@map("loyalty_rewards")
+}
+
+model LoyaltyRedemption {
+  id               String          @id @default(cuid())
+  redemptionCode   String          @unique // e.g. "RDM-78392"
+  customerId       String
+  customer         LoyaltyCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rewardId         String
+  reward           LoyaltyReward   @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+  rewardTitle      String
+  status           String          @default("COMPLETED") // COMPLETED, REVERSED
+  serviceReference String?
+  adminUsername    String
+  notes            String?
+  redeemedAt       DateTime        @default(now())
+  reversedAt       DateTime?
+  reversedBy       String?
+
+  @@map("loyalty_redemptions")
+}
+
+model LoyaltyTransaction {
+  id               String          @id @default(cuid())
+  customerId       String
+  customer         LoyaltyCustomer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type             String          // STAMP_EARNED, STAMP_DEDUCTED, REWARD_UNLOCKED, REWARD_REDEEMED, REWARD_REVERSED, ACCOUNT_CREATED
+  amount           Int             // +1, -4, etc.
+  balanceAfter     Int
+  serviceName      String?
+  serviceReference String?
+  adminUsername    String?
+  notes            String?
+  createdAt        DateTime        @default(now())
+
+  @@map("loyalty_transactions")
+}
+

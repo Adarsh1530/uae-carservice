@@ -241,7 +241,56 @@ async function main() {
   }
   console.log('✅ Gallery Images seeded successfully.');
 
+  // 6. Loyalty Program Initialization
+  await prisma.loyaltyProgramConfig.upsert({
+    where: { id: 'default' },
+    update: {},
+    create: {
+      id: 'default',
+      programName: 'WALESS VIP LOYALTY PASS',
+      programTagline: 'BUY 4 SERVICES = 1 FREE BESPOKE FINISH',
+      isActive: true,
+      rewardMode: 'STAMPS',
+      stampsPerReward: 4,
+      stampsPerVisit: 1,
+      rewardExpiryDays: 365,
+      rewardTitle: '1 FREE BESPOKE FINISH',
+      rewardDescription: 'Enjoy a complimentary bespoke finish or luxury detailing service after collecting 4 service stamps.',
+      termsConditions: '• Present your digital loyalty pass or member ID upon vehicle arrival at WALESS GROUP.\n• Receive 1 stamp for each qualifying service or maintenance visit.\n• Redeem your free reward once the required stamps have been accumulated.\n• Valid exclusively at WALESS GROUP Al Dhait South, Ras Al Khaimah, UAE.\n• Passes and rewards are non-transferable, cannot be redeemed for cash, and cannot be combined with conflicting promotional discounts.',
+    },
+  });
+
+  const rewardExists = await prisma.loyaltyReward.findFirst();
+  if (!rewardExists) {
+    await prisma.loyaltyReward.createMany({
+      data: [
+        {
+          id: 'rew_free_finish',
+          title: '1 FREE BESPOKE FINISH',
+          description: 'Complimentary exterior bespoke finish or luxury hand-detail on your 5th visit.',
+          requiredStamps: 4,
+          requiredPoints: 400,
+          validDays: 90,
+          isActive: true,
+          displayOrder: 1,
+        },
+        {
+          id: 'rew_ceramic_boost',
+          title: 'VIP CERAMIC TOP-UP & GLASS TREATMENT',
+          description: 'Complimentary hydrophobic glass coating and ceramic spray sealant boost.',
+          requiredStamps: 6,
+          requiredPoints: 600,
+          validDays: 90,
+          isActive: true,
+          displayOrder: 2,
+        },
+      ],
+    });
+  }
+  console.log('✅ Loyalty Program seeded successfully.');
+
   console.log('🎉 WALESS GROUP Database Seeding Completed!');
+
 }
 
 main()
