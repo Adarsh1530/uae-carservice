@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Settings, Save, Loader2, CheckCircle2, Upload } from 'lucide-react';
+import { Settings, Save, Loader2, CheckCircle2, Upload, QrCode, Download, ExternalLink } from 'lucide-react';
 import { SiteSettings } from '@/lib/types';
 import { compressAndUploadImage } from '@/lib/clientUpload';
 
@@ -202,6 +202,124 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, domain: e.target.value })}
                 className="w-full px-4 py-2.5 rounded-xl bg-black border border-brand-border text-white text-xs focus:border-brand-green"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Official Website & Loyalty QR Codes */}
+        <div className="p-6 rounded-2xl bg-brand-surface border border-brand-border space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-border pb-4">
+            <div>
+              <h3 className="font-heading font-bold text-lg text-white border-l-2 border-brand-green pl-3 flex items-center gap-2">
+                <QrCode className="w-5 h-5 text-brand-green" />
+                Website QR Codes & Print Downloads
+              </h3>
+              <p className="text-xs text-gray-400 mt-1 pl-3">
+                High-resolution QR codes that redirect straight to your official website & loyalty program when scanned by any phone camera.
+              </p>
+            </div>
+            <span className="self-start sm:self-auto text-[11px] font-mono text-brand-green bg-brand-green/10 px-3 py-1 rounded-full border border-brand-green/30">
+              Print Ready (300 DPI)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* 1. Official Website QR */}
+            <div className="p-5 rounded-xl bg-black/70 border border-brand-border/80 flex flex-col md:flex-row gap-5 items-center">
+              <div className="relative w-44 h-44 shrink-0 bg-white p-2.5 rounded-2xl border-2 border-brand-green/40 shadow-neon-sm flex items-center justify-center">
+                <Image
+                  src="/qr/waless-website-qr-with-logo.png"
+                  alt="WALESS GROUP Website QR Code"
+                  width={160}
+                  height={160}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex-1 space-y-2 text-center md:text-left w-full">
+                <div className="inline-block px-2.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold bg-brand-green/20 text-brand-green border border-brand-green/30">
+                  Main Website
+                </div>
+                <h4 className="text-base font-heading font-bold text-white">Official Website QR</h4>
+                <p className="text-xs text-gray-400 font-mono break-all">
+                  Redirects to: <span className="text-brand-green">https://walessgroup.ae</span>
+                </p>
+                <div className="flex flex-wrap gap-2 pt-2 justify-center md:justify-start">
+                  <a
+                    href="/qr/waless-website-qr-with-logo.png"
+                    download="waless-website-qr-with-logo.png"
+                    className="px-3 py-1.5 rounded-lg bg-brand-green text-black font-heading font-bold text-[11px] hover:bg-brand-greenLight transition-all flex items-center gap-1.5 shadow-neon-sm"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Branded QR (PNG)
+                  </a>
+                  <a
+                    href="/qr/waless-website-qr.svg"
+                    download="waless-website-qr.svg"
+                    className="px-3 py-1.5 rounded-lg bg-brand-surface border border-brand-border text-gray-200 font-mono text-[11px] hover:border-brand-green transition-all flex items-center gap-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Vector (SVG)
+                  </a>
+                  <a
+                    href="/qr/waless-website-counter-display.png"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1.5 rounded-lg bg-black border border-brand-green/40 text-brand-green font-mono text-[11px] hover:bg-brand-green/10 transition-all flex items-center gap-1.5"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Table Stand Poster
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Loyalty Club QR */}
+            <div className="p-5 rounded-xl bg-black/70 border border-brand-border/80 flex flex-col md:flex-row gap-5 items-center">
+              <div className="relative w-44 h-44 shrink-0 bg-white p-2.5 rounded-2xl border-2 border-brand-green/40 shadow-neon-sm flex items-center justify-center">
+                <Image
+                  src="/qr/waless-loyalty-qr-with-logo.png"
+                  alt="WALESS VIP Loyalty Club QR Code"
+                  width={160}
+                  height={160}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex-1 space-y-2 text-center md:text-left w-full">
+                <div className="inline-block px-2.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                  VIP Rewards Program
+                </div>
+                <h4 className="text-base font-heading font-bold text-white">Loyalty Card Signup QR</h4>
+                <p className="text-xs text-gray-400 font-mono break-all">
+                  Redirects to: <span className="text-brand-green">https://walessgroup.ae/loyalty</span>
+                </p>
+                <div className="flex flex-wrap gap-2 pt-2 justify-center md:justify-start">
+                  <a
+                    href="/qr/waless-loyalty-qr-with-logo.png"
+                    download="waless-loyalty-qr-with-logo.png"
+                    className="px-3 py-1.5 rounded-lg bg-yellow-400 text-black font-heading font-bold text-[11px] hover:bg-yellow-300 transition-all flex items-center gap-1.5 shadow-neon-sm"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Branded QR (PNG)
+                  </a>
+                  <a
+                    href="/qr/waless-loyalty-qr.svg"
+                    download="waless-loyalty-qr.svg"
+                    className="px-3 py-1.5 rounded-lg bg-brand-surface border border-brand-border text-gray-200 font-mono text-[11px] hover:border-brand-green transition-all flex items-center gap-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Vector (SVG)
+                  </a>
+                  <a
+                    href="/qr/waless-loyalty-counter-display.png"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1.5 rounded-lg bg-black border border-yellow-500/40 text-yellow-400 font-mono text-[11px] hover:bg-yellow-500/10 transition-all flex items-center gap-1.5"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Table Stand Poster
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
